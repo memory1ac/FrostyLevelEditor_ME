@@ -1,0 +1,13 @@
+using FrostySdk.IO;
+using FrostySdk.Managers;
+using FrostySdk.Managers.Entries;
+using FrostySdk.Resources;
+
+namespace LevelEditorPlugin.Resources;
+
+public class TerrainDecals : Resource
+{
+    public override void Read(NativeReader reader, AssetManager am, ResAssetEntry entry, ModifiedResource modifiedData)
+    {
+    }
+}

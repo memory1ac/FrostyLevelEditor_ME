@@ -1,0 +1,93 @@
+<ctrl:FrostyDockableWindow
+    x:Class="FrostyEditor.Windows.PrelaunchWindow2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:Frosty.Controls;assembly=FrostyControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:FrostyEditor.Windows"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Frosty Editor"
+    Width="1000"
+    Height="600"
+    Icon="/FrostyEditor;component/AppIcon.ico"
+    Loaded="Window_Loaded"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <Grid Background="{StaticResource ControlBackground}">
+        <Grid Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="38" />
+            </Grid.RowDefinitions>
+
+            <ListView
+                x:Name="ConfigList"
+                Grid.Row="0"
+                Background="{StaticResource WindowBackground}"
+                MouseDoubleClick="ConfigList_MouseDoubleClick"
+                SelectionChanged="ConfigList_SelectionChanged">
+                <ListView.View>
+                    <ctrl:FrostyAutoSizedGridView>
+                        <GridView.Columns>
+                            <GridViewColumn Header="Name">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Height="48" Orientation="Horizontal">
+                                            <Image
+                                                Width="32"
+                                                Margin="0,0,8,0"
+                                                Source="{Binding Path=Thumbnail}" />
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=GameName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Path">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Height="48" Orientation="Horizontal">
+                                            <TextBlock VerticalAlignment="Center" Text="{Binding Path=GamePath}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView.Columns>
+                    </ctrl:FrostyAutoSizedGridView>
+                </ListView.View>
+            </ListView>
+
+            <Grid Grid.Row="1" Background="{StaticResource ListBackground}">
+                <Button
+                    x:Name="NewConfigButton"
+                    Margin="0,6,66,6"
+                    Padding="12,0"
+                    HorizontalAlignment="Right"
+                    Click="NewConfigButton_Click"
+                    Content="New" />
+                <Button
+                    x:Name="RemoveConfigButton"
+                    Margin="0,6,119,6"
+                    Padding="12,0"
+                    HorizontalAlignment="Right"
+                    Click="RemoveConfigButton_Click"
+                    Content="Remove" />
+                <Button
+                    x:Name="LaunchConfigButton"
+                    Margin="0,6,6,6"
+                    Padding="12,0"
+                    HorizontalAlignment="Right"
+                    Click="LaunchConfigButton_Click"
+                    Content="Select" />
+
+                <Button
+                    Margin="6,6,0,6"
+                    Padding="12,0"
+                    HorizontalAlignment="Left"
+                    Click="ScanForGamesButton_Click"
+                    Content="Scan for games" />
+            </Grid>
+        </Grid>
+    </Grid>
+</ctrl:FrostyDockableWindow>

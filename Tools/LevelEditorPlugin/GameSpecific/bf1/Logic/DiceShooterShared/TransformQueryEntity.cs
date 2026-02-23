@@ -1,0 +1,15 @@
+namespace LevelEditorPlugin.Entities;
+
+[EntityBinding(DataType = typeof(FrostySdk.Ebx.TransformQueryEntityData))]
+public class TransformQueryEntity : GameplayQueryBaseEntity, IEntityData<FrostySdk.Ebx.TransformQueryEntityData>
+{
+    public new FrostySdk.Ebx.TransformQueryEntityData Data => data as FrostySdk.Ebx.TransformQueryEntityData;
+    public override string DisplayName => "TransformQuery";
+    public override FrostySdk.Ebx.Realm Realm => Data.Realm;
+
+    public TransformQueryEntity(FrostySdk.Ebx.TransformQueryEntityData inData, Entity inParent)
+        : base(inData, inParent)
+    {
+    }
+}
+

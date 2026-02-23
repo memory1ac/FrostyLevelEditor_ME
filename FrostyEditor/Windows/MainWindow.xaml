@@ -1,0 +1,1678 @@
+<ctrl2:FrostyWindow
+    x:Class="FrostyEditor.Windows.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cmd="clr-namespace:FrostyEditor.Commands"
+    xmlns:conv="clr-namespace:Frosty.Core.Converters;assembly=FrostyCore"
+    xmlns:core="clr-namespace:Frosty.Core.Controls;assembly=FrostyCore"
+    xmlns:ctrl2="clr-namespace:Frosty.Controls;assembly=FrostyControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ext="clr-namespace:FrostyEditor.Extensions"
+    xmlns:local="clr-namespace:FrostyEditor"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:windows="clr-namespace:FrostyEditor.Windows"
+    Title="Frosty Editor"
+    Width="1280"
+    Height="720"
+    MinWidth="500"
+    MinHeight="250"
+    Closing="FrostyWindow_Closing"
+    FrostyLoaded="FrostyWindow_Loaded"
+    Icon="/FrostyEditor;component/AppIcon.ico"
+    WindowState="Maximized"
+    mc:Ignorable="d">
+
+    <ctrl2:FrostyWindow.Resources>
+        <conv:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
+        <cmd:ExportModMenuItemCommand x:Key="exportModMenuItemCommand" />
+        <ContextMenu x:Key="bookmarksContextMenu">
+            <MenuItem Click="contextMenuBookmarkItemOpen_Click" Header="Open asset">
+                <MenuItem.Icon>
+                    <Image Opacity="0.5" Source="/FrostyEditor;component/Images/OpenAsset.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Click="contextMenuBookmarkItemFind_Click" Header="Find in explorer" />
+        </ContextMenu>
+    </ctrl2:FrostyWindow.Resources>
+
+    <Grid x:Name="mainGrid" Background="{StaticResource ListBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22" />
+            <RowDefinition Height="26" />
+            <RowDefinition Height="24" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="0" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Menu
+                x:Name="menu"
+                Grid.Column="0"
+                Height="22"
+                VerticalAlignment="Top">
+                <MenuItem Height="22" Header="File">
+                    <MenuItem
+                        x:Name="NewModMenuItem"
+                        Height="22"
+                        Click="newModMenuItem_Click"
+                        Header="New"
+                        InputGestureText="Ctrl+N">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/New.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        x:Name="OpenModMenuItem"
+                        Height="22"
+                        Click="openModMenuItem_Click"
+                        Header="Open"
+                        InputGestureText="Ctrl+O">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/Open.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        x:Name="SaveModMenuItem"
+                        Height="22"
+                        Click="saveModMenuItem_Click"
+                        Header="Save"
+                        InputGestureText="Ctrl+S">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/Save.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
+                        x:Name="SaveAsModMenuItem"
+                        Height="22"
+                        Click="saveAsModMenuItem_Click"
+                        Header="Save As"
+                        InputGestureText="Ctrl+Shift+S">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/SaveAs.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem
+                        x:Name="ExportModMenuItem"
+                        Height="22"
+                        Command="{StaticResource exportModMenuItemCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}"
+                        Header="Export to Mod">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/Compile.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem
+                        x:Name="ExitMenuItem"
+                        Height="22"
+                        Click="exitMenuItem_Click"
+                        Header="Exit"
+                        InputGestureText="Alt+F4">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/Exit.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem
+                    x:Name="ToolsMenuItem"
+                    Height="22"
+                    Header="Tools" />
+                <MenuItem Height="22" Header="Window">
+                    <MenuItem
+                        x:Name="CloseAllDocumentsMenuItem"
+                        Click="closeAllDocumentsMenuItem_Click"
+                        Header="Close All Documents"
+                        InputGestureText="Ctrl + D">
+                        <MenuItem.Icon>
+                            <Image Source="/FrostyEditor;component/Images/CloseAll.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Height="22" Header="Help">
+                    <MenuItem
+                        x:Name="AboutMenuItem"
+                        Click="aboutMenuItem_Click"
+                        Header="About Frosty Editor" />
+                </MenuItem>
+            </Menu>
+        </Grid>
+
+        <Grid Grid.Row="1" Background="{StaticResource ListBackground}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="2,0,2,0">
+                <DockPanel Margin="1,1,1,1">
+                    <!--  Editor  -->
+                    <Border
+                        HorizontalAlignment="Left"
+                        Background="{StaticResource ControlBackground}"
+                        DockPanel.Dock="Left"
+                        RenderOptions.EdgeMode="Aliased">
+                        <StackPanel Margin="6,0,6,0" Orientation="Horizontal">
+                            <Button
+                                Width="20"
+                                Height="20"
+                                Margin="0,0,0,0"
+                                Click="newModMenuItem_Click"
+                                ToolTip="New Project">
+                                <Image Width="16" Source="/FrostyEditor;component/Images/New.png" />
+                            </Button>
+                            <Button
+                                Width="20"
+                                Height="20"
+                                Margin="4,0,0,0"
+                                Click="openModMenuItem_Click"
+                                ToolTip="Open Project">
+                                <Image Width="16" Source="/FrostyEditor;component/Images/Open.png" />
+                            </Button>
+                            <Button
+                                Width="20"
+                                Height="20"
+                                Margin="4,0,0,0"
+                                Click="saveModMenuItem_Click"
+                                ToolTip="Save Project">
+                                <Image Width="16" Source="/FrostyEditor;component/Images/Save.png" />
+                            </Button>
+                            <Button
+                                Width="20"
+                                Height="20"
+                                Margin="4,0,0,0"
+                                Click="saveAsModMenuItem_Click"
+                                ToolTip="Save Project As">
+                                <Image Width="16" Source="/FrostyEditor;component/Images/SaveAs.png" />
+                            </Button>
+                            <!--<Border Width="1" Background="#D0D0D0" Margin="8,3,2,3"/>-->
+                        </StackPanel>
+                    </Border>
+                    <!--  Editor Toolbar  -->
+                    <Border
+                        Margin="1,0,0,0"
+                        Background="{StaticResource ControlBackground}"
+                        DockPanel.Dock="Left"
+                        RenderOptions.EdgeMode="Aliased">
+                        <ItemsControl x:Name="EditorToolbarItems" Margin="2,1,6,1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel IsItemsHost="True" Orientation="Horizontal">
+                                        <!--  Toolbar bindings go here  -->
+                                    </StackPanel>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Height="20"
+                                        Margin="4,0,0,0"
+                                        Command="{Binding Path=Command}"
+                                        ToolTip="{Binding Path=ToolTip}">
+                                        <StackPanel
+                                            x:Name="panel"
+                                            Margin="4,0,4,0"
+                                            Orientation="Horizontal">
+                                            <Image
+                                                x:Name="icon"
+                                                Width="16"
+                                                Source="{Binding Path=Icon}" />
+                                            <TextBlock
+                                                x:Name="text"
+                                                Margin="4,0,0,0"
+                                                Text="{Binding Path=Text}" />
+                                        </StackPanel>
+                                    </Button>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Path=Icon}" Value="{x:Null}">
+                                            <Setter TargetName="icon" Property="Visibility" Value="Collapsed" />
+                                            <Setter TargetName="text" Property="Margin" Value="0" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=Text}" Value="">
+                                            <Setter TargetName="text" Property="Margin" Value="0" />
+                                            <Setter TargetName="panel" Property="Margin" Value="0" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border.Style>
+                            <Style TargetType="{x:Type Border}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=Items.Count, ElementName=EditorToolbarItems}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
+                    <!--  Asset Toolbar  -->
+                    <Border
+                        Margin="1,0,0,0"
+                        Background="{StaticResource ControlBackground}"
+                        DockPanel.Dock="Left"
+                        RenderOptions.EdgeMode="Aliased">
+                        <ItemsControl x:Name="AssetEditorToolbarItems" Margin="2,1,6,1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel IsItemsHost="True" Orientation="Horizontal">
+                                        <!--  Toolbar bindings go here  -->
+                                    </StackPanel>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Height="20"
+                                        Margin="4,0,0,0"
+                                        Command="{Binding Path=Command}"
+                                        ToolTip="{Binding Path=ToolTip}">
+                                        <StackPanel
+                                            x:Name="panel"
+                                            Margin="4,0,4,0"
+                                            Orientation="Horizontal">
+                                            <Image
+                                                x:Name="icon"
+                                                Width="16"
+                                                Source="{Binding Path=Icon}" />
+                                            <TextBlock
+                                                x:Name="text"
+                                                Margin="4,0,0,0"
+                                                Text="{Binding Path=Text}" />
+                                        </StackPanel>
+                                    </Button>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Path=Icon}" Value="{x:Null}">
+                                            <Setter TargetName="icon" Property="Visibility" Value="Collapsed" />
+                                            <Setter TargetName="text" Property="Margin" Value="0" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=Text}" Value="">
+                                            <Setter TargetName="text" Property="Margin" Value="0" />
+                                            <Setter TargetName="panel" Property="Margin" Value="0" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border.Style>
+                            <Style TargetType="{x:Type Border}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=Items.Count, ElementName=AssetEditorToolbarItems}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
+                    <!--  Launch  -->
+                    <Border
+                        Margin="1,0,0,0"
+                        Background="{StaticResource ControlBackground}"
+                        DockPanel.Dock="Left"
+                        RenderOptions.EdgeMode="Aliased">
+                        <StackPanel Margin="6,2,6,2" Orientation="Horizontal">
+                            <Button
+                                x:Name="LaunchButton"
+                                Margin="0"
+                                Click="launchButton_Click"
+                                IsEnabled="false"
+                                ToolTip="Launch game with current project">
+                                <StackPanel Margin="4,0,4,0" Orientation="Horizontal">
+                                    <Image
+                                        Grid.Column="0"
+                                        Width="16"
+                                        Source="../Images/Play.png" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Margin="4,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Text="Launch" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                    <!--  Filler  -->
+                    <Border
+                        Margin="1,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        Background="Transparent"
+                        DockPanel.Dock="Left"
+                        RenderOptions.EdgeMode="Aliased" />
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <Border
+            Grid.Row="2"
+            BorderBrush="{StaticResource ControlBackground}"
+            BorderThickness="2,2,2,0">
+            <ctrl2:FrostyTabControl
+                x:Name="TabControl"
+                Margin="2,2,2,0"
+                SelectionChanged="tabControl_SelectionChanged">
+                <ctrl2:FrostyTabControl.Style>
+                    <Style TargetType="{x:Type ctrl2:FrostyTabControl}">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ctrl2:FrostyTabControl}">
+                                    <Grid
+                                        x:Name="templateRoot"
+                                        ClipToBounds="true"
+                                        KeyboardNavigation.TabNavigation="Local"
+                                        SnapsToDevicePixels="true">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition x:Name="ColumnDefinition0" />
+                                            <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition x:Name="RowDefinition0" Height="Auto" />
+                                            <RowDefinition x:Name="RowDefinition1" Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <ScrollViewer
+                                                x:Name="PART_ScrollViewer"
+                                                Margin="0,0,0,-1"
+                                                Padding="0"
+                                                BorderThickness="0"
+                                                HorizontalScrollBarVisibility="Hidden"
+                                                IsTabStop="False"
+                                                VerticalScrollBarVisibility="Disabled">
+                                                <TabPanel
+                                                    x:Name="headerPanel"
+                                                    Grid.Row="0"
+                                                    Grid.Column="0"
+                                                    Margin="-1,0,0,0"
+                                                    Panel.ZIndex="1"
+                                                    Background="Transparent"
+                                                    IsItemsHost="true"
+                                                    KeyboardNavigation.TabIndex="1" />
+                                            </ScrollViewer>
+
+                                            <Border Grid.Column="1">
+                                                <RepeatButton
+                                                    x:Name="PART_ScrollLeft"
+                                                    Width="21"
+                                                    Content="&lt;">
+                                                    <RepeatButton.Template>
+                                                        <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                            <Border Background="{StaticResource ScrollbarBackground}">
+                                                                <Border
+                                                                    x:Name="border"
+                                                                    Margin="1"
+                                                                    Background="{StaticResource ControlBackground}">
+                                                                    <Polygon
+                                                                        Margin="7,10,0,0"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Top"
+                                                                        Fill="{StaticResource ButtonImage}"
+                                                                        Points="0,0 3.5,3.5 3.5,-3.5"
+                                                                        Stroke="{StaticResource ButtonImage}" />
+                                                                </Border>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                                </Trigger>
+                                                                <Trigger Property="IsPressed" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </RepeatButton.Template>
+                                                </RepeatButton>
+                                            </Border>
+
+                                            <Border Grid.Column="2">
+                                                <RepeatButton
+                                                    x:Name="PART_ScrollRight"
+                                                    Width="21"
+                                                    Content="&gt;">
+                                                    <RepeatButton.Template>
+                                                        <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                            <Border Background="{StaticResource ScrollbarBackground}">
+                                                                <Border
+                                                                    x:Name="border"
+                                                                    Margin="1"
+                                                                    Background="{StaticResource ControlBackground}">
+                                                                    <Polygon
+                                                                        Margin="12,10,0,0"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Top"
+                                                                        Fill="{StaticResource ButtonImage}"
+                                                                        Points="0,0 -3.5,3.5 -3.5,-3.5"
+                                                                        Stroke="{StaticResource ButtonImage}" />
+                                                                </Border>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                                </Trigger>
+                                                                <Trigger Property="IsPressed" Value="True">
+                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </RepeatButton.Template>
+                                                </RepeatButton>
+                                            </Border>
+                                        </Grid>
+
+                                    </Grid>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="TabStripPlacement" Value="Bottom">
+                                            <Setter TargetName="headerPanel" Property="Grid.Row" Value="1" />
+                                            <!--<Setter Property="Grid.Row" TargetName="contentPanel" Value="0"/>-->
+                                            <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                            <Setter TargetName="RowDefinition1" Property="Height" Value="Auto" />
+                                            <Setter TargetName="headerPanel" Property="Margin" Value="2,0,2,2" />
+                                        </Trigger>
+                                        <Trigger Property="TabStripPlacement" Value="Left">
+                                            <Setter TargetName="headerPanel" Property="Grid.Row" Value="0" />
+                                            <Setter TargetName="headerPanel" Property="Grid.Column" Value="0" />
+                                            <Setter TargetName="ColumnDefinition0" Property="Width" Value="Auto" />
+                                            <Setter TargetName="ColumnDefinition1" Property="Width" Value="*" />
+                                            <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                            <Setter TargetName="RowDefinition1" Property="Height" Value="0" />
+                                            <Setter TargetName="headerPanel" Property="Margin" Value="2,2,0,2" />
+                                        </Trigger>
+                                        <Trigger Property="TabStripPlacement" Value="Right">
+                                            <Setter TargetName="headerPanel" Property="Grid.Row" Value="0" />
+                                            <Setter TargetName="headerPanel" Property="Grid.Column" Value="1" />
+                                            <Setter TargetName="ColumnDefinition0" Property="Width" Value="*" />
+                                            <Setter TargetName="ColumnDefinition1" Property="Width" Value="Auto" />
+                                            <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                            <Setter TargetName="RowDefinition1" Property="Height" Value="0" />
+                                            <Setter TargetName="headerPanel" Property="Margin" Value="0,2,2,2" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="false">
+                                            <Setter TargetName="templateRoot" Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ctrl2:FrostyTabControl.Style>
+                <ctrl2:FrostyTabControl.Resources>
+                    <Style TargetType="ctrl2:FrostyTabItem">
+                        <Setter Property="AllowDrop" Value="True" />
+                        <EventSetter Event="MouseMove" Handler="TabItem_MouseMove" />
+                        <EventSetter Event="DragOver" Handler="TabItem_Move" />
+                    </Style>
+                </ctrl2:FrostyTabControl.Resources>
+                <ctrl2:FrostyTabItem
+                    CloseButtonVisible="False"
+                    Header="Home Page"
+                    Icon="/FrostyEditor;component/Images/Home.png">
+                    <Grid Background="{StaticResource ControlBackground}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="64" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!--  Multiplayer Warning  -->
+                        <Grid Margin="2" Background="{StaticResource ListBackground}">
+                            <Grid Grid.Row="0" Margin="5">
+                                <Image
+                                    Width="32"
+                                    Margin="20,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Source="/FrostyEditor;component/Images/Warning.png" />
+                                <TextBlock
+                                    Margin="80,0,50,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource FontColor}"
+                                    Text="The developers do not support this tool being used to modify files that impact multiplayer in any way shape or form, and will not provide support to anyone who attempts this."
+                                    TextAlignment="Left"
+                                    TextWrapping="Wrap" />
+                            </Grid>
+                        </Grid>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--  Loaded Plugins / Convenient Links  -->
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="2*" />
+                                </Grid.RowDefinitions>
+
+                                <Grid
+                                    Grid.Row="0"
+                                    Margin="2"
+                                    Background="{StaticResource ListBackground}">
+                                    <ScrollViewer
+                                        Grid.Row="0"
+                                        Padding="4"
+                                        HorizontalScrollBarVisibility="Auto"
+                                        VerticalScrollBarVisibility="Auto">
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock
+                                                Margin="8"
+                                                FontWeight="Bold"
+                                                Foreground="{StaticResource FontColor}"
+                                                Text="Convenient Links" />
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="Frosty Website:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="http://www.frostytoolsuite.com"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        http://www.frostytoolsuite.com
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="Frosty Support:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="https://discord.gg/sB8ZUAT"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        https://discord.gg/sB8ZUAT
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="Frosty Source Code:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="https://github.com/CadeEvs/FrostyToolsuite"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        https://github.com/CadeEvs/FrostyToolsuite
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="Intel® Texture Works Plugin for Photoshop:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="https://software.intel.com/en-us/articles/intel-texture-works-plugin"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        https://software.intel.com/en-us/articles/intel-texture-works-plugin
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="GPUOpen-Tools/Compressonator:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="https://github.com/GPUOpen-Tools/Compressonator/releases"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        https://github.com/GPUOpen-Tools/Compressonator/releases
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="DirectX Texture Library:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="https://github.com/Microsoft/DirectXTex/releases"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        https://github.com/Microsoft/DirectXTex/releases
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Margin="8,8,0,0" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="0,0,20,0"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="DirectX End-User Runtime Web Installer:" />
+                                                <TextBlock>
+                                                    <Hyperlink
+                                                        Foreground="{StaticResource FontColor}"
+                                                        NavigateUri="https://www.microsoft.com/en-au/download/details.aspx?id=35"
+                                                        RequestNavigate="hyperlink_RequestNavigate">
+                                                        https://www.microsoft.com/en-au/download/details.aspx?id=35
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ScrollViewer>
+                                </Grid>
+
+                                <Grid
+                                    Grid.Row="1"
+                                    Margin="2"
+                                    Background="{StaticResource ListBackground}">
+                                    <ListView x:Name="LoadedPluginsList">
+                                        <ListView.View>
+                                            <ctrl2:FrostyAutoSizedGridView>
+                                                <GridView.Columns>
+                                                    <GridViewColumn Header="Name">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Height="24" Orientation="Horizontal">
+                                                                    <TextBlock VerticalAlignment="Center" Text="{Binding Path=Name}" />
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                    <GridViewColumn Header="Author">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Height="24" Orientation="Horizontal">
+                                                                    <TextBlock VerticalAlignment="Center" Text="{Binding Path=Author}" />
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                    <GridViewColumn Header="Version">
+                                                        <GridViewColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Height="24" Orientation="Horizontal">
+                                                                    <TextBlock VerticalAlignment="Center" Text="{Binding Path=Version}" />
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </GridViewColumn.CellTemplate>
+                                                    </GridViewColumn>
+                                                </GridView.Columns>
+                                            </ctrl2:FrostyAutoSizedGridView>
+                                        </ListView.View>
+                                    </ListView>
+                                </Grid>
+                            </Grid>
+
+                            <GridSplitter
+                                Width="3"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Stretch"
+                                Background="Transparent" />
+
+                            <!--  Changelog  -->
+                            <Grid
+                                Grid.Column="1"
+                                Margin="2"
+                                Background="{StaticResource ListBackground}">
+                                <ScrollViewer
+                                    Padding="4"
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock
+                                            Margin="8"
+                                            FontWeight="Bold"
+                                            Foreground="{StaticResource FontColor}"
+                                            Text="Change Log" />
+                                        <StackPanel Margin="8,8,0,0" Orientation="Vertical">
+                                            <TextBlock
+                                                x:Name="changeLogTextBlock"
+                                                Margin="0,0,8,0"
+                                                FontFamily="Consolas"
+                                                Foreground="{StaticResource FontColor}"
+                                                Text="{ext:Text 'ChangeLog.txt'}"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </ctrl2:FrostyTabItem>
+            </ctrl2:FrostyTabControl>
+        </Border>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{StaticResource ControlBackground}">
+                <Grid Margin="2" Background="{StaticResource ListBackground}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5*" />
+                        <ColumnDefinition Width="13*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="33" />
+                        <RowDefinition Height="3*" />
+                    </Grid.RowDefinitions>
+
+                    <ctrl2:FrostyTabControl
+                        x:Name="explorerTabControl"
+                        Grid.ColumnSpan="2"
+                        SelectionChanged="explorerTabControl_SelectionChanged">
+                        <ctrl2:FrostyTabControl.Style>
+                            <Style TargetType="{x:Type ctrl2:FrostyTabControl}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type ctrl2:FrostyTabControl}">
+                                            <Grid
+                                                x:Name="templateRoot"
+                                                ClipToBounds="true"
+                                                KeyboardNavigation.TabNavigation="Local"
+                                                SnapsToDevicePixels="true">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition x:Name="ColumnDefinition0" />
+                                                    <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition x:Name="RowDefinition0" Height="Auto" />
+                                                    <RowDefinition x:Name="RowDefinition1" Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel>
+                                                    <!--  Dockable Window Deco  -->
+                                                    <StackPanel x:Name="DockableBar" Height="13">
+                                                        <Border Height="11" Background="#232323" />
+                                                        <Border Height="1" Background="#1a1a1a" />
+                                                        <Border Height="1" Background="#2f2f2f" />
+                                                    </StackPanel>
+
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="14" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Grid Width="14" Height="20">
+                                                            <Border Background="#292929" />
+                                                            <Path
+                                                                x:Name="dockingDeco"
+                                                                Width="14"
+                                                                Height="20"
+                                                                Margin="0,0,0,0"
+                                                                Data="{Binding Source={StaticResource DockingDeco}, Path=Data}"
+                                                                Fill="#454545"
+                                                                RenderTransformOrigin="0.5,0.5">
+                                                                <Path.RenderTransform>
+                                                                    <TransformGroup>
+                                                                        <ScaleTransform />
+                                                                        <SkewTransform />
+                                                                        <RotateTransform />
+                                                                        <TranslateTransform Y="-1" />
+                                                                    </TransformGroup>
+                                                                </Path.RenderTransform>
+                                                            </Path>
+                                                        </Grid>
+
+                                                        <ScrollViewer
+                                                            x:Name="PART_ScrollViewer"
+                                                            Grid.Column="1"
+                                                            Margin="0,0,0,-1"
+                                                            Padding="0"
+                                                            BorderThickness="0"
+                                                            HorizontalScrollBarVisibility="Hidden"
+                                                            IsTabStop="False"
+                                                            VerticalScrollBarVisibility="Disabled">
+                                                            <TabPanel
+                                                                x:Name="headerPanel"
+                                                                Grid.Row="0"
+                                                                Grid.Column="0"
+                                                                Margin="-1,0,0,0"
+                                                                Panel.ZIndex="1"
+                                                                Background="Transparent"
+                                                                IsItemsHost="true"
+                                                                KeyboardNavigation.TabIndex="1" />
+                                                        </ScrollViewer>
+
+                                                        <Border Grid.Column="2">
+                                                            <RepeatButton
+                                                                x:Name="PART_ScrollLeft"
+                                                                Width="21"
+                                                                Content="&lt;">
+                                                                <RepeatButton.Template>
+                                                                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                                        <Border Background="{StaticResource ScrollbarBackground}">
+                                                                            <Border
+                                                                                x:Name="border"
+                                                                                Margin="1"
+                                                                                Background="{StaticResource ControlBackground}">
+                                                                                <Polygon
+                                                                                    Margin="7,10,0,0"
+                                                                                    HorizontalAlignment="Left"
+                                                                                    VerticalAlignment="Top"
+                                                                                    Fill="{StaticResource ButtonImage}"
+                                                                                    Points="0,0 3.5,3.5 3.5,-3.5"
+                                                                                    Stroke="{StaticResource ButtonImage}" />
+                                                                            </Border>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                                            </Trigger>
+                                                                            <Trigger Property="IsPressed" Value="True">
+                                                                                <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </RepeatButton.Template>
+                                                            </RepeatButton>
+                                                        </Border>
+
+                                                        <Border Grid.Column="3">
+                                                            <RepeatButton
+                                                                x:Name="PART_ScrollRight"
+                                                                Width="21"
+                                                                Content="&gt;">
+                                                                <RepeatButton.Template>
+                                                                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                                        <Border Background="{StaticResource ScrollbarBackground}">
+                                                                            <Border
+                                                                                x:Name="border"
+                                                                                Margin="1"
+                                                                                Background="{StaticResource ControlBackground}">
+                                                                                <Polygon
+                                                                                    Margin="12,10,0,0"
+                                                                                    HorizontalAlignment="Left"
+                                                                                    VerticalAlignment="Top"
+                                                                                    Fill="{StaticResource ButtonImage}"
+                                                                                    Points="0,0 -3.5,3.5 -3.5,-3.5"
+                                                                                    Stroke="{StaticResource ButtonImage}" />
+                                                                            </Border>
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                                            </Trigger>
+                                                                            <Trigger Property="IsPressed" Value="True">
+                                                                                <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </RepeatButton.Template>
+                                                            </RepeatButton>
+                                                        </Border>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="TabStripPlacement" Value="Bottom">
+                                                    <Setter TargetName="headerPanel" Property="Grid.Row" Value="1" />
+                                                    <!--<Setter Property="Grid.Row" TargetName="contentPanel" Value="0"/>-->
+                                                    <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                                    <Setter TargetName="RowDefinition1" Property="Height" Value="Auto" />
+                                                    <Setter TargetName="headerPanel" Property="Margin" Value="2,0,2,2" />
+                                                </Trigger>
+                                                <Trigger Property="TabStripPlacement" Value="Left">
+                                                    <Setter TargetName="headerPanel" Property="Grid.Row" Value="0" />
+                                                    <Setter TargetName="headerPanel" Property="Grid.Column" Value="0" />
+                                                    <Setter TargetName="ColumnDefinition0" Property="Width" Value="Auto" />
+                                                    <Setter TargetName="ColumnDefinition1" Property="Width" Value="*" />
+                                                    <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                                    <Setter TargetName="RowDefinition1" Property="Height" Value="0" />
+                                                    <Setter TargetName="headerPanel" Property="Margin" Value="2,2,0,2" />
+                                                </Trigger>
+                                                <Trigger Property="TabStripPlacement" Value="Right">
+                                                    <Setter TargetName="headerPanel" Property="Grid.Row" Value="0" />
+                                                    <Setter TargetName="headerPanel" Property="Grid.Column" Value="1" />
+                                                    <Setter TargetName="ColumnDefinition0" Property="Width" Value="*" />
+                                                    <Setter TargetName="ColumnDefinition1" Property="Width" Value="Auto" />
+                                                    <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                                    <Setter TargetName="RowDefinition1" Property="Height" Value="0" />
+                                                    <Setter TargetName="headerPanel" Property="Margin" Value="0,2,2,2" />
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="false">
+                                                    <Setter TargetName="templateRoot" Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ctrl2:FrostyTabControl.Style>
+
+                        <ctrl2:FrostyTabItem
+                            x:Name="dataExplorerTabItem"
+                            CloseButtonVisible="False"
+                            Header="Data Explorer"
+                            Icon="/FrostyEditor;component/Images/Database.png">
+                            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="0,2,0,0">
+                                <core:FrostyDataExplorer
+                                    x:Name="dataExplorer"
+                                    BookmarkContext="Asset Bookmarks"
+                                    SelectedAssetDoubleClick="dataExplorer_SelectedAssetDoubleClick"
+                                    SelectionChanged="dataExplorer_SelectionChanged">
+                                    <core:FrostyDataExplorer.AssetContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Click="contextMenuOpen_Click" Header="Open">
+                                                <MenuItem.Icon>
+                                                    <Image Source="/FrostyEditor;component/Images/OpenAsset.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Click="contextMenuRevert_Click" Header="Revert">
+                                                <MenuItem.Icon>
+                                                    <Image Source="/FrostyEditor;component/Images/Revert.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <Separator />
+                                            <MenuItem Click="contextMenuExportEbx_Click" Header="Export">
+                                                <MenuItem.Icon>
+                                                    <Image Source="/FrostyEditor;component/Images/Export.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Click="contextMenuImportEbx_Click" Header="Import">
+                                                <MenuItem.Icon>
+                                                    <Image Source="/FrostyEditor;component/Images/Import.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <!--  2026/01/20  -->
+                                            <!--  Change marker  -->
+                                            <Separator />
+                                            <MenuItem Click="contextMenuGetEbxInfo_Click" Header="● Copy Guid" />
+                                            <MenuItem Click="contextMenuGetEbxInfo_Click" Header="● Copy Path" />
+                                            <MenuItem Click="contextMenuGetEbxInfo_Click" Header="● Copy Display Name" />
+                                            <MenuItem Click="contextMenuGetEbxInfo_Click" Header="● Copy Type Name" />
+                                            <MenuItem Click="contextMenuGetEbxInfo_Click" Header="★ Print Ebx Info">
+                                                <MenuItem.Icon>
+                                                    <Image RenderOptions.BitmapScalingMode="Fant" Source="/FrostyEditor;component/Images/Properties.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <Separator />
+                                        </ContextMenu>
+                                    </core:FrostyDataExplorer.AssetContextMenu>
+                                </core:FrostyDataExplorer>
+                            </Border>
+                        </ctrl2:FrostyTabItem>
+                        <ctrl2:FrostyTabItem
+                            x:Name="legacyExplorerTabItem"
+                            CloseButtonVisible="False"
+                            Header="Legacy Explorer"
+                            Icon="/FrostyEditor;component/Images/Database.png"
+                            Visibility="Collapsed">
+                            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="0,2,0,0">
+                                <core:FrostyDataExplorer
+                                    x:Name="legacyExplorer"
+                                    BookmarkContext="Legacy Bookmarks"
+                                    MultiSelect="True"
+                                    SelectedAssetDoubleClick="dataExplorer_SelectedAssetDoubleClick">
+                                    <core:FrostyDataExplorer.AssetContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Click="contextMenuOpen_Click" Header="Open">
+                                                <MenuItem.Icon>
+                                                    <Image Opacity="0.5" Source="/FrostyEditor;component/Images/OpenAsset.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Click="contextMenuRevert_Click" Header="Revert">
+                                                <MenuItem.Icon>
+                                                    <Image Opacity="0.5" Source="/FrostyEditor;component/Images/Revert.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Click="contextMenuExportAsset_Click" Header="Export">
+                                                <MenuItem.Icon>
+                                                    <Image Opacity="0.5" Source="/FrostyEditor;component/Images/Export.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Click="contextMenuImportAsset_Click" Header="Import">
+                                                <MenuItem.Icon>
+                                                    <Image Opacity="0.5" Source="/FrostyEditor;component/Images/Import.png" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </core:FrostyDataExplorer.AssetContextMenu>
+                                </core:FrostyDataExplorer>
+                            </Border>
+                        </ctrl2:FrostyTabItem>
+                    </ctrl2:FrostyTabControl>
+
+                    <ctrl2:FrostyDetachedTabControl
+                        x:Name="explorerTabContent"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2"
+                        Foreground="{StaticResource FontColor}" />
+                </Grid>
+            </Border>
+
+            <GridSplitter
+                Width="3"
+                Margin="0,0,0,0"
+                VerticalAlignment="Stretch"
+                Background="#00000000"
+                ResizeDirection="Columns" />
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+
+                <ctrl2:FrostyDetachedTabControl x:Name="tabContent" Foreground="{StaticResource FontColor}" />
+
+                <GridSplitter
+                    Grid.Row="0"
+                    Height="3"
+                    Margin="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    Background="#00000000"
+                    ResizeDirection="Rows" />
+
+                <Border
+                    Grid.Row="1"
+                    Background="{StaticResource ControlBackground}"
+                    RenderOptions.EdgeMode="Aliased">
+                    <Grid Margin="2" Background="{StaticResource ListBackground}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="33" />
+                            <RowDefinition Height="3*" />
+                        </Grid.RowDefinitions>
+
+                        <ctrl2:FrostyTabControl x:Name="miscTabControl" SelectionChanged="MiscTabControl_SelectionChanged">
+                            <ctrl2:FrostyTabControl.Style>
+                                <Style TargetType="{x:Type ctrl2:FrostyTabControl}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ctrl2:FrostyTabControl}">
+                                                <Grid
+                                                    x:Name="templateRoot"
+                                                    ClipToBounds="true"
+                                                    KeyboardNavigation.TabNavigation="Local"
+                                                    SnapsToDevicePixels="true">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition x:Name="ColumnDefinition0" />
+                                                        <ColumnDefinition x:Name="ColumnDefinition1" Width="0" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition x:Name="RowDefinition0" Height="Auto" />
+                                                        <RowDefinition x:Name="RowDefinition1" Height="*" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <StackPanel>
+                                                        <!--  Dockable Window Deco  -->
+                                                        <StackPanel x:Name="DockableBar" Height="13">
+                                                            <Border Height="11" Background="#232323" />
+                                                            <Border Height="2" Background="#1a1a1a" />
+                                                            <Border Height="1" Background="#2f2f2f" />
+                                                        </StackPanel>
+
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="14" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <Grid Width="14" Height="20">
+                                                                <Border Background="#292929" />
+                                                                <Path
+                                                                    x:Name="dockingDeco"
+                                                                    Width="14"
+                                                                    Height="20"
+                                                                    Margin="0,0,0,0"
+                                                                    Data="{Binding Source={StaticResource DockingDeco}, Path=Data}"
+                                                                    Fill="#454545"
+                                                                    RenderTransformOrigin="0.5,0.5">
+                                                                    <Path.RenderTransform>
+                                                                        <TransformGroup>
+                                                                            <ScaleTransform />
+                                                                            <SkewTransform />
+                                                                            <RotateTransform />
+                                                                            <TranslateTransform Y="-1" />
+                                                                        </TransformGroup>
+                                                                    </Path.RenderTransform>
+                                                                </Path>
+                                                            </Grid>
+
+                                                            <ScrollViewer
+                                                                x:Name="PART_ScrollViewer"
+                                                                Grid.Column="1"
+                                                                Margin="0,0,0,-1"
+                                                                Padding="0"
+                                                                BorderThickness="0"
+                                                                HorizontalScrollBarVisibility="Hidden"
+                                                                IsTabStop="False"
+                                                                VerticalScrollBarVisibility="Disabled">
+                                                                <TabPanel
+                                                                    x:Name="headerPanel"
+                                                                    Grid.Row="0"
+                                                                    Grid.Column="0"
+                                                                    Margin="-1,0,0,0"
+                                                                    Panel.ZIndex="1"
+                                                                    Background="Transparent"
+                                                                    IsItemsHost="true"
+                                                                    KeyboardNavigation.TabIndex="1" />
+                                                            </ScrollViewer>
+
+                                                            <Border Grid.Column="2">
+                                                                <RepeatButton
+                                                                    x:Name="PART_ScrollLeft"
+                                                                    Width="21"
+                                                                    Content="&lt;">
+                                                                    <RepeatButton.Template>
+                                                                        <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                                            <Border Background="{StaticResource ScrollbarBackground}">
+                                                                                <Border
+                                                                                    x:Name="border"
+                                                                                    Margin="1"
+                                                                                    Background="{StaticResource ControlBackground}">
+                                                                                    <Polygon
+                                                                                        Margin="7,10,0,0"
+                                                                                        HorizontalAlignment="Left"
+                                                                                        VerticalAlignment="Top"
+                                                                                        Fill="{StaticResource ButtonImage}"
+                                                                                        Points="0,0 3.5,3.5 3.5,-3.5"
+                                                                                        Stroke="{StaticResource ButtonImage}" />
+                                                                                </Border>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                                                </Trigger>
+                                                                                <Trigger Property="IsPressed" Value="True">
+                                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </RepeatButton.Template>
+                                                                </RepeatButton>
+                                                            </Border>
+
+                                                            <Border Grid.Column="3">
+                                                                <RepeatButton
+                                                                    x:Name="PART_ScrollRight"
+                                                                    Width="21"
+                                                                    Content="&gt;">
+                                                                    <RepeatButton.Template>
+                                                                        <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                                            <Border Background="{StaticResource ScrollbarBackground}">
+                                                                                <Border
+                                                                                    x:Name="border"
+                                                                                    Margin="1"
+                                                                                    Background="{StaticResource ControlBackground}">
+                                                                                    <Polygon
+                                                                                        Margin="12,10,0,0"
+                                                                                        HorizontalAlignment="Left"
+                                                                                        VerticalAlignment="Top"
+                                                                                        Fill="{StaticResource ButtonImage}"
+                                                                                        Points="0,0 -3.5,3.5 -3.5,-3.5"
+                                                                                        Stroke="{StaticResource ButtonImage}" />
+                                                                                </Border>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                                                </Trigger>
+                                                                                <Trigger Property="IsPressed" Value="True">
+                                                                                    <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </RepeatButton.Template>
+                                                                </RepeatButton>
+                                                            </Border>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="TabStripPlacement" Value="Bottom">
+                                                        <Setter TargetName="headerPanel" Property="Grid.Row" Value="1" />
+                                                        <!--<Setter Property="Grid.Row" TargetName="contentPanel" Value="0"/>-->
+                                                        <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                                        <Setter TargetName="RowDefinition1" Property="Height" Value="Auto" />
+                                                        <Setter TargetName="headerPanel" Property="Margin" Value="2,0,2,2" />
+                                                    </Trigger>
+                                                    <Trigger Property="TabStripPlacement" Value="Left">
+                                                        <Setter TargetName="headerPanel" Property="Grid.Row" Value="0" />
+                                                        <Setter TargetName="headerPanel" Property="Grid.Column" Value="0" />
+                                                        <Setter TargetName="ColumnDefinition0" Property="Width" Value="Auto" />
+                                                        <Setter TargetName="ColumnDefinition1" Property="Width" Value="*" />
+                                                        <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                                        <Setter TargetName="RowDefinition1" Property="Height" Value="0" />
+                                                        <Setter TargetName="headerPanel" Property="Margin" Value="2,2,0,2" />
+                                                    </Trigger>
+                                                    <Trigger Property="TabStripPlacement" Value="Right">
+                                                        <Setter TargetName="headerPanel" Property="Grid.Row" Value="0" />
+                                                        <Setter TargetName="headerPanel" Property="Grid.Column" Value="1" />
+                                                        <Setter TargetName="ColumnDefinition0" Property="Width" Value="*" />
+                                                        <Setter TargetName="ColumnDefinition1" Property="Width" Value="Auto" />
+                                                        <Setter TargetName="RowDefinition0" Property="Height" Value="*" />
+                                                        <Setter TargetName="RowDefinition1" Property="Height" Value="0" />
+                                                        <Setter TargetName="headerPanel" Property="Margin" Value="0,2,2,2" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="false">
+                                                        <Setter TargetName="templateRoot" Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ctrl2:FrostyTabControl.Style>
+                            <ctrl2:FrostyTabItem CloseButtonVisible="False" Header="Log">
+                                <Grid>
+                                    <Border
+                                        BorderBrush="{StaticResource ControlBackground}"
+                                        BorderThickness="0,2,0,0"
+                                        RenderOptions.EdgeMode="Aliased">
+                                        <TextBox
+                                            x:Name="tb"
+                                            Background="{StaticResource ListBackground}"
+                                            FontFamily="Consolas"
+                                            HorizontalScrollBarVisibility="Auto"
+                                            IsReadOnly="True"
+                                            TextChanged="logTextBox_TextChanged"
+                                            VerticalScrollBarVisibility="Auto" />
+                                    </Border>
+                                </Grid>
+                            </ctrl2:FrostyTabItem>
+                            <ctrl2:FrostyTabItem
+                                x:Name="BookmarkTabItem"
+                                Background="Transparent"
+                                CloseButtonVisible="False"
+                                Header="Bookmarks"
+                                Loaded="BookmarkTabItem_Loaded">
+                                <ctrl2:FrostyTabItem.Style>
+                                    <Style TargetType="{x:Type ctrl2:FrostyTabItem}">
+                                        <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                                        <Setter Property="Padding" Value="6,0,6,0" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ctrl2:FrostyTabItem}">
+                                                    <Grid
+                                                        x:Name="templateRoot"
+                                                        Height="20"
+                                                        SnapsToDevicePixels="True">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Border x:Name="mainBorder" Background="{StaticResource ControlBackground}">
+                                                                <Grid>
+                                                                    <Grid Margin="{TemplateBinding Padding}">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="*" />
+                                                                            <ColumnDefinition />
+                                                                        </Grid.ColumnDefinitions>
+
+                                                                        <ContentPresenter
+                                                                            x:Name="contentPresenter"
+                                                                            Grid.Column="0"
+                                                                            HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                                            VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                                            ContentSource="Header"
+                                                                            Focusable="False"
+                                                                            RecognizesAccessKey="False"
+                                                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                                        <Label
+                                                                            x:Name="PART_DragLabel"
+                                                                            Grid.ColumnSpan="2"
+                                                                            HorizontalAlignment="Stretch"
+                                                                            VerticalAlignment="Stretch" />
+                                                                        <Button
+                                                                            x:Name="PART_CloseButton"
+                                                                            Grid.Column="1"
+                                                                            Width="16"
+                                                                            Height="16"
+                                                                            Margin="4,0,-2,0"
+                                                                            HorizontalAlignment="Right"
+                                                                            VerticalAlignment="Center"
+                                                                            Background="Transparent">
+                                                                            <Image Margin="-2" Source="/FrostyEditor;component/Images/CloseWindow.png" />
+                                                                        </Button>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </Border>
+                                                            <Border Background="{TemplateBinding Background}" />
+
+                                                            <Border
+                                                                x:Name="TabSeparatorDeco"
+                                                                Width="1"
+                                                                Height="22"
+                                                                Background="#1a1a1a" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="CloseButtonVisible" Value="False">
+                                                            <Setter TargetName="PART_CloseButton" Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="false" />
+                                                                <Condition Binding="{Binding TabStripPlacement, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}" Value="Top" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter TargetName="mainBorder" Property="Background" Value="#292929" />
+                                                            <Setter Property="Foreground" Value="#80F8F8F8" />
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="true" />
+                                                                <Condition Binding="{Binding IsSelected, RelativeSource={RelativeSource Self}}" Value="false" />
+                                                                <Condition Binding="{Binding TabStripPlacement, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}" Value="Top" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter TargetName="mainBorder" Property="Background" Value="#333333" />
+                                                        </MultiDataTrigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ctrl2:FrostyTabItem.Style>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="26" />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <!--  Backgrounds  -->
+                                    <Border
+                                        Grid.RowSpan="2"
+                                        Background="{StaticResource ListBackground}"
+                                        RenderOptions.EdgeMode="Aliased" />
+                                    <Border Background="{StaticResource ControlBackground}" RenderOptions.EdgeMode="Aliased" />
+
+                                    <StackPanel Margin="0,0,3,0" Orientation="Horizontal">
+                                        <ComboBox
+                                            x:Name="BookmarkContextPicker"
+                                            Width="150"
+                                            Margin="0,2,6,2"
+                                            Padding="4,2,4,2"
+                                            IsEditable="False"
+                                            IsEnabled="False"
+                                            SelectionChanged="BookmarkContextPicker_SelectionChanged">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <Button
+                                            x:Name="BookmarkAddButton"
+                                            Width="22"
+                                            Height="22"
+                                            Margin="0,1,6,1"
+                                            Padding="0,0,0,0"
+                                            Click="BookmarkAddButton_Click"
+                                            IsEnabled="False"
+                                            ToolTip="Add Bookmark (Ctrl+B)">
+                                            <Image
+                                                Width="16"
+                                                Height="16"
+                                                Source="/FrostyEditor;component/Images/AddBookmark.png" />
+                                        </Button>
+                                        <Button
+                                            x:Name="BookmarkRemoveButton"
+                                            Width="22"
+                                            Height="22"
+                                            Margin="0,1,6,1"
+                                            Padding="0,0,0,0"
+                                            Click="BookmarkRemoveButton_Click"
+                                            IsEnabled="False"
+                                            ToolTip="Remove Bookmark (Ctrl+Shift+B)">
+                                            <Image
+                                                Width="16"
+                                                Height="16"
+                                                Source="/FrostyEditor;component/Images/RemoveBookmark.png" />
+                                        </Button>
+                                        <Button
+                                            x:Name="BookmarkAddFolderButton"
+                                            Width="22"
+                                            Height="22"
+                                            Margin="0,1,6,1"
+                                            Padding="0,0,0,0"
+                                            Click="BookmarkAddFolderButton_Click"
+                                            IsEnabled="True"
+                                            ToolTip="Add Folder">
+                                            <Image
+                                                Width="16"
+                                                Height="16"
+                                                Source="/FrostyEditor;component/Images/AddFolder.png" />
+                                        </Button>
+                                        <Button
+                                            x:Name="BookmarkEditLabelButton"
+                                            Width="22"
+                                            Height="22"
+                                            Margin="0,1,6,1"
+                                            Padding="0,0,0,0"
+                                            Click="BookmarkEditLabelButton_Click"
+                                            IsEnabled="False"
+                                            ToolTip="Edit Name">
+                                            <Image
+                                                Width="16"
+                                                Height="16"
+                                                Source="/FrostyEditor;component/Images/EditLabel.png" />
+                                        </Button>
+                                        <Grid MinWidth="170">
+
+                                            <Border
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="2"
+                                                Margin="0,2,2,2"
+                                                BorderBrush="#868686"
+                                                BorderThickness="1">
+                                                <ctrl2:FrostyWatermarkTextBox
+                                                    x:Name="BookmarkFilterTextBox"
+                                                    Padding="4,2,4,2"
+                                                    TextChanged="BookmarkFilterTextBox_TextChanged"
+                                                    WatermarkText="Filter" />
+                                            </Border>
+
+                                        </Grid>
+                                        <Label x:Name="BookmarkFilterInfo" FontFamily="MS Reference Sans Serif" />
+                                    </StackPanel>
+                                    <TreeView
+                                        x:Name="BookmarkTreeView"
+                                        Grid.Row="1"
+                                        ItemsSource="{Binding Path=SelectedItem.Bookmarks, ElementName=BookmarkContextPicker}"
+                                        MouseDown="BookmarkTreeView_MouseDown"
+                                        SelectedItemChanged="BookmarkTreeView_SelectedItemChanged">
+                                        <TreeView.ItemContainerStyle>
+                                            <Style TargetType="{x:Type TreeViewItem}">
+                                                <Setter Property="ContextMenu" Value="{StaticResource bookmarksContextMenu}" />
+                                                <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+                                                <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <EventSetter Event="TreeViewItem.PreviewMouseRightButtonDown" Handler="BookmarkTreeViewItem_PreviewMouseRightButtonDown" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                                                            <ControlTemplate.Resources>
+                                                                <SolidColorBrush x:Key="filterExclusionBrush" Color="#7D1C1C1C" />
+                                                            </ControlTemplate.Resources>
+                                                            <Grid Visibility="{Binding Path=IsVisible, Converter={StaticResource booleanToVisibilityConverter}}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" MinWidth="19" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition />
+                                                                </Grid.RowDefinitions>
+
+                                                                <Grid Grid.Column="0" Grid.ColumnSpan="3">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto" MinWidth="19" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <Label
+                                                                        x:Name="Bd"
+                                                                        Grid.Column="1"
+                                                                        Grid.ColumnSpan="3"
+                                                                        Margin="-10000,0,0,0"
+                                                                        Background="{Binding Path=Background, RelativeSource={RelativeSource AncestorType={x:Type Grid}}}" />
+                                                                    <ToggleButton
+                                                                        x:Name="Expander"
+                                                                        ClickMode="Press"
+                                                                        IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}">
+                                                                        <ToggleButton.Template>
+                                                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                                                <Border
+                                                                                    Width="16"
+                                                                                    Height="16"
+                                                                                    Padding="5"
+                                                                                    Background="Transparent">
+                                                                                    <Path
+                                                                                        x:Name="ExpandPath"
+                                                                                        Fill="{StaticResource ControlPressed}"
+                                                                                        Stroke="{StaticResource ControlPressed}">
+                                                                                        <Path.Data>
+                                                                                            <PathGeometry Figures="M0,0 L0,6 L6,0 z" />
+                                                                                        </Path.Data>
+                                                                                        <Path.RenderTransform>
+                                                                                            <RotateTransform Angle="135" CenterX="3" CenterY="3" />
+                                                                                        </Path.RenderTransform>
+                                                                                    </Path>
+                                                                                </Border>
+                                                                                <ControlTemplate.Triggers>
+                                                                                    <Trigger Property="IsChecked" Value="True">
+                                                                                        <Setter TargetName="ExpandPath" Property="RenderTransform">
+                                                                                            <Setter.Value>
+                                                                                                <RotateTransform Angle="180" CenterX="3" CenterY="3" />
+                                                                                            </Setter.Value>
+                                                                                        </Setter>
+                                                                                    </Trigger>
+                                                                                </ControlTemplate.Triggers>
+                                                                            </ControlTemplate>
+                                                                        </ToggleButton.Template>
+                                                                    </ToggleButton>
+                                                                    <Border
+                                                                        Grid.Column="1"
+                                                                        BorderThickness="0"
+                                                                        SnapsToDevicePixels="True">
+                                                                        <ContentPresenter
+                                                                            x:Name="PART_Header"
+                                                                            VerticalAlignment="Stretch"
+                                                                            ContentSource="Header" />
+                                                                    </Border>
+                                                                    <Label
+                                                                        x:Name="filterExclusion"
+                                                                        Grid.ColumnSpan="3"
+                                                                        Margin="-10000,0,0,0"
+                                                                        Background="{StaticResource filterExclusionBrush}"
+                                                                        Visibility="{Binding Path=IsFiltered, Converter={StaticResource booleanToVisibilityConverter}}" />
+
+                                                                    <Grid.Style>
+                                                                        <Style TargetType="{x:Type Grid}">
+                                                                            <Setter Property="Background" Value="Transparent" />
+                                                                            <Style.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <!--  2026/01/24  -->
+                                                                                    <!--  Change marker  -->
+                                                                                    <Setter Property="Background" Value="#303030" />
+                                                                                    <Setter Property="Background" Value="{StaticResource SubItemHighlight}" />
+                                                                                </Trigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Grid.Style>
+                                                                </Grid>
+                                                                <ItemsPresenter
+                                                                    x:Name="ItemsHost"
+                                                                    Grid.Row="1"
+                                                                    Grid.Column="1"
+                                                                    Grid.ColumnSpan="2" />
+                                                            </Grid>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsExpanded" Value="False">
+                                                                    <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed" />
+                                                                </Trigger>
+                                                                <Trigger Property="HasItems" Value="False">
+                                                                    <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
+                                                                </Trigger>
+                                                                <Trigger Property="IsSelected" Value="True">
+                                                                    <Setter TargetName="Bd" Property="Background" Value="{StaticResource SubItemPressed}" />
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsFolder}" Value="True">
+                                                        <Setter Property="ContextMenu" Value="{x:Null}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TreeView.ItemContainerStyle>
+                                        <TreeView.ItemTemplate>
+                                            <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
+                                                <StackPanel
+                                                    Height="24"
+                                                    VerticalAlignment="Center"
+                                                    Orientation="Horizontal">
+                                                    <StackPanel.InputBindings>
+                                                        <MouseBinding Command="{Binding Path=BookmarkItemDoubleClickCommand, RelativeSource={RelativeSource AncestorType={x:Type windows:MainWindow}}}" Gesture="LeftDoubleClick" />
+                                                    </StackPanel.InputBindings>
+                                                    <Image
+                                                        x:Name="imageRect"
+                                                        Grid.Column="0"
+                                                        Width="16"
+                                                        Height="16"
+                                                        Margin="3,0,6,0"
+                                                        Source="{Binding Path=Icon}" />
+                                                    <ctrl2:FrostyEditableLabel
+                                                        Margin="0,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        EditEnded="FrostyEditableLabel_EditEnded"
+                                                        FontWeight="Bold"
+                                                        Text="{Binding Path=Name, Mode=TwoWay}" />
+                                                    <TextBlock
+                                                        x:Name="bookmarkPath"
+                                                        Margin="0,0,8,0"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{StaticResource FontColor}"
+                                                        Opacity="0.5"
+                                                        Text="{Binding Path=Text}" />
+                                                </StackPanel>
+                                                <HierarchicalDataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=Name}" Value="">
+                                                        <Setter TargetName="bookmarkPath" Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                </HierarchicalDataTemplate.Triggers>
+                                            </HierarchicalDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                    </TreeView>
+                                </Grid>
+                            </ctrl2:FrostyTabItem>
+                        </ctrl2:FrostyTabControl>
+
+                        <ctrl2:FrostyDetachedTabControl
+                            x:Name="miscTabContent"
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2"
+                            Foreground="{StaticResource FontColor}" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="4">
+            <Border
+                Background="#FF141414"
+                BorderBrush="{StaticResource ControlBackground}"
+                BorderThickness="2,0,2,2" />
+        </Grid>
+    </Grid>
+</ctrl2:FrostyWindow>   

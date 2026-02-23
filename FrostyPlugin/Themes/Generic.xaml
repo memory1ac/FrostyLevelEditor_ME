@@ -1,0 +1,2184 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cmd="clr-namespace:Frosty.Core.Commands"
+    xmlns:conv="clr-namespace:Frosty.Core.Converters"
+    xmlns:ctrl="clr-namespace:Frosty.Controls;assembly=FrostyControls"
+    xmlns:editors="clr-namespace:Frosty.Core.Controls.Editors"
+    xmlns:falpha="FrostyAlpha"
+    xmlns:local="clr-namespace:Frosty.Core.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+    <ResourceDictionary.MergedDictionaries>
+
+        <!--  Core Controls  -->
+        <ResourceDictionary Source="/FrostyControls;component/Themes/Generic.xaml" />
+
+        <!--  Icons  -->
+        <ResourceDictionary Source="/FrostyCore;component/Themes/Icons.xaml" />
+
+        <!--  Controls  -->
+        <ResourceDictionary Source="/FrostyCore;component/Themes/Controls/Notification.xaml" />
+
+    </ResourceDictionary.MergedDictionaries>
+
+    <Path x:Key="Icon" Data="M 66.669922 4.7421875 L 53.285156 18.126953 L 57.832031 35.804688 L 43.941406 28.482422 L 44.699219 43.380859 L 31.0625 30.501953 L 13.132812 35.046875 L 17.929688 54.494141 L 35.355469 58.533203 L 22.476562 67.119141 L 34.849609 74.443359 L 17.425781 79.494141 L 13.384766 97.171875 L 32.830078 102.98047 L 44.699219 90.353516 L 45.457031 105.75781 L 57.578125 99.193359 L 53.791016 117.62695 L 67.427734 129.49609 L 80.306641 115.10156 L 76.771484 98.181641 L 90.662109 104.74805 L 90.408203 91.869141 L 104.04492 104.24414 L 121.4707 99.697266 L 116.92578 80.503906 L 98.490234 75.201172 L 111.11719 67.119141 L 98.742188 59.796875 L 117.42969 54.746094 L 121.97656 37.068359 L 102.7832 30.753906 L 89.904297 43.634766 L 89.146484 27.976562 L 76.519531 34.542969 L 80.560547 17.117188 L 66.669922 4.7421875 z M 66.658203 25.910156 L 73.65625 37.314453 L 66.580078 62.201172 L 60.175781 37.300781 L 66.658203 25.910156 z M 31.072266 45.349609 L 44.464844 45.794922 L 63.214844 65.169922 L 38.125 58.027344 L 31.072266 45.349609 z M 88.75 46.509766 L 102.76758 47.3125 L 95.892578 58.384766 L 70.892578 64.455078 L 88.75 46.509766 z M 63.035156 68.830078 L 45.177734 87.3125 L 30.714844 87.3125 L 37.677734 75.349609 L 63.035156 68.830078 z M 71.160156 69.277344 L 95.982422 76.242188 L 103.48242 88.294922 L 89.822266 88.5625 L 71.160156 69.277344 z M 66.785156 71.419922 L 73.839844 96.330078 L 66.607422 108.02734 L 59.910156 95.974609 L 66.785156 71.419922 z" />
+    <Path x:Key="AssignIcon" Data="M0 6 L0 6 4 6 4 3 9 7.5 4 12 4 9 0 9" />
+    <Path x:Key="RemoveButtonIcon" Data="M 2.9879313,0.07751471 1.7192748,1.3461711 0.45113524,0.07803148 0.07803141,0.4511353 1.346171,1.7192749 0.07751465,2.9879314 0.45165202,3.3620686 1.7203084,2.0934123 2.988448,3.3615519 3.3615518,2.9884481 2.0934122,1.7203085 3.3620685,0.45165208 Z" />
+    <Path x:Key="AddButtonIcon" Data="M 1.4552083 0.26354987 V 1.4552084 H 0.2635498 V 1.9843751 H 1.4552083 V 3.1760335 H 1.984375 V 1.9843751 H 3.1760334 V 1.4552084 H 1.984375 V 0.26354987 Z" />
+
+    <!--  FrostyDataExplorer  -->
+    <DataTemplate x:Key="assetListViewNoSorting">
+        <DockPanel LastChildFill="True">
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{StaticResource FontColor}"
+                Text="{Binding}" />
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate x:Key="assetListViewAscendingSorting">
+        <DockPanel LastChildFill="True">
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{StaticResource FontColor}"
+                Text="{Binding}" />
+            <Path
+                Margin="0,0,8,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Data="M 5,5 L 10,10 L 15,5 L 5,5"
+                Fill="{StaticResource FontColor}"
+                StrokeThickness="1" />
+        </DockPanel>
+    </DataTemplate>
+    <DataTemplate x:Key="assetListViewDescendingSorting">
+        <DockPanel LastChildFill="True">
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{StaticResource FontColor}"
+                Text="{Binding}" />
+            <Path
+                Margin="0,0,8,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Data="M 5,10 L 15,10 L 10,5 L 5,10"
+                Fill="{StaticResource FontColor}"
+                StrokeThickness="1" />
+        </DockPanel>
+    </DataTemplate>
+
+    <Style TargetType="{x:Type local:FrostyDataExplorer}">
+        <Setter Property="TileTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <DataTemplate.Resources>
+                        <conv:AssetEntryAndSizeToBitmapSourceConverter x:Key="AssetEntryAndSizeToBitmapSourceConverter" />
+                    </DataTemplate.Resources>
+                    <Grid
+                        Margin="1,5"
+                        Background="Transparent"
+                        ToolTip="{Binding Path=DisplayName}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" HorizontalAlignment="Center">
+                            <!--<Path StrokeThickness="1" Stroke="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}}" Data="M0 0 0 1 1 1 1 0 0 0" Stretch="Uniform"/>-->
+                            <Image Margin="1" Stretch="Uniform">
+                                <Image.Source>
+                                    <MultiBinding Converter="{StaticResource AssetEntryAndSizeToBitmapSourceConverter}">
+                                        <Binding Path="." />
+                                        <Binding Path="(ListView.View).ItemWidth" RelativeSource="{RelativeSource AncestorType=ListView}" />
+                                        <Binding Path="(ListView.View).ItemWidth" RelativeSource="{RelativeSource AncestorType=ListView}" />
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
+                        </Grid>
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="0,2,0,0"
+                            HorizontalAlignment="Center"
+                            Text="{Binding Path=DisplayName}"
+                            TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyDataExplorer}">
+                    <ControlTemplate.Resources>
+                        <Style
+                            x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:FrostyPropertyGrid},
+                                                         ResourceId=TileViewDefaultStyle}"
+                            BasedOn="{StaticResource {x:Type ListBox}}"
+                            TargetType="{x:Type ListView}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="ItemTemplate" Value="{Binding (ListView.View).ItemTemplate, RelativeSource={RelativeSource Self}}" />
+                            <Setter Property="ItemsPanel">
+                                <Setter.Value>
+                                    <ItemsPanelTemplate>
+                                        <local:VirtualizingTilePanel
+                                            Width="{Binding (FrameworkElement.ActualWidth), RelativeSource={RelativeSource AncestorType=ScrollContentPresenter}}"
+                                            MinWidth="{Binding (ListView.View).ItemWidth, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                            ChildSize="{Binding (ListView.View).ItemHeight, RelativeSource={RelativeSource AncestorType=ListView}}" />
+                                    </ItemsPanelTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style
+                            x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type local:FrostyPropertyGrid},
+                                                         ResourceId=DetailViewDefaultStyle}"
+                            BasedOn="{StaticResource {x:Type ListView}}"
+                            TargetType="{x:Type ListView}" />
+                        <conv:StringToPathDataConverter x:Key="StringToPathDataConverter" />
+                        <conv:BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
+                        <conv:AssetEntryToBitmapSourceConverter x:Key="AssetEntryToBitmapSourceConverter" />
+                        <DataTemplate x:Key="DisplayNameCellTemplate">
+                            <Grid Height="22">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image
+                                    x:Name="imageRect"
+                                    Grid.Column="0"
+                                    Width="16"
+                                    Height="16"
+                                    Source="{Binding Path=., Converter={StaticResource AssetEntryToBitmapSourceConverter}}" />
+
+                                <TextBlock
+                                    x:Name="displayName"
+                                    Grid.Column="1"
+                                    Margin="6,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontFamily="MS Reference Sans Serif"
+                                    FontWeight="Normal"
+                                    Text="{Binding Path=DisplayName}" />
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsModified}" Value="True">
+                                    <Setter TargetName="displayName" Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                        <DataTemplate x:Key="TypeCellTemplate">
+                            <Grid Height="22">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontFamily="MS Reference Sans Serif"
+                                    Text="{Binding Path=Type}" />
+                            </Grid>
+                        </DataTemplate>
+                        <Style
+                            x:Key="DetailViewItemContainerStyle"
+                            BasedOn="{StaticResource baseListViewItemStyle}"
+                            TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ContextMenu" Value="{Binding Path=AssetContextMenu, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FrostyDataExplorer}}}" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border x:Name="Border" Background="Transparent">
+                                            <Border.InputBindings>
+                                                <MouseBinding Command="{Binding Path=DoubleClickCommand, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyDataExplorer}}}" Gesture="LeftDoubleClick" />
+                                            </Border.InputBindings>
+                                            <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SubItemHighlight}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SubItemPressed}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style x:Key="TileViewItemContainerStyle" TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Foreground" Value="{DynamicResource TextColorBrush}" />
+                            <Setter Property="ContextMenu" Value="{Binding Path=AssetContextMenu, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FrostyDataExplorer}}}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border x:Name="Border" Background="Transparent">
+                                            <Border.InputBindings>
+                                                <MouseBinding Command="{Binding Path=DoubleClickCommand, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyDataExplorer}}}" Gesture="LeftDoubleClick" />
+                                            </Border.InputBindings>
+                                            <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SubItemHighlight}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource SubItemPressed}" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ControlTemplate.Resources>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition x:Name="toolbarRow" Height="0" />
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="2*" />
+                            <RowDefinition Height="{Binding Path=InitialHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FrostyDataExplorer}}}" />
+                        </Grid.RowDefinitions>
+
+                        <DockPanel Grid.Row="0">
+                            <Border Margin="1" Background="{StaticResource ControlBackground}">
+                                <StackPanel
+                                    Height="24"
+                                    Margin="0,0,6,0"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <!--  Find Opened Asset  -->
+                                    <Button
+                                        Width="20"
+                                        Height="20"
+                                        Margin="6,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding Path=FindOpenedAssetCommand, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyDataExplorer}}}"
+                                        ToolTip="Find Opened Asset">
+                                        <Image Width="16" Source="/FrostyEditor;component/Images/Open.png" />
+                                    </Button>
+                                    <!--  Show Only Modified  -->
+                                    <CheckBox
+                                        x:Name="PART_ShowOnlyModifiedCheckBox"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        IsChecked="{Binding Path=ShowOnlyModified, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FrostyDataExplorer}}}">
+                                        <TextBlock
+                                            Margin="4,-1,0,0"
+                                            VerticalAlignment="Center"
+                                            Foreground="{StaticResource FontColor}"
+                                            Text="Show only modified" />
+                                    </CheckBox>
+                                </StackPanel>
+                            </Border>
+                        </DockPanel>
+
+                        <DockPanel Grid.Row="1" LastChildFill="True">
+                            <Border
+                                Margin="1,-1,1,1"
+                                Background="Transparent"
+                                CornerRadius="2">
+                                <ctrl:FrostyWatermarkTextBox
+                                    x:Name="PART_FilterTextBox"
+                                    Height="24"
+                                    Padding="4,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    BorderThickness="1"
+                                    WatermarkText="Filter" />
+                            </Border>
+                        </DockPanel>
+
+                        <TreeView
+                            x:Name="PART_AssetTreeView"
+                            Grid.Row="2"
+                            Margin="0,0,0,3">
+                            <TreeView.Resources>
+                                <conv:TreeViewListSortConverter x:Key="treeViewListSortConverter" />
+                            </TreeView.Resources>
+                            <TreeView.ItemContainerStyle>
+                                <Style BasedOn="{StaticResource baseTreeViewItemStyle}" TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+                                    <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, Converter={StaticResource treeViewListSortConverter}, ConverterParameter=PathName}">
+                                    <StackPanel
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <Rectangle
+                                            x:Name="imageRect"
+                                            Grid.Column="0"
+                                            Width="16"
+                                            Height="16"
+                                            Margin="3,0,0,0"
+                                            Fill="{StaticResource FontColor}">
+                                            <Rectangle.OpacityMask>
+                                                <ImageBrush ImageSource="/FrostyEditor;component/Images/CloseFolder.png" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                        <TextBlock
+                                            Margin="8,0,3,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="MS Reference Sans Serif"
+                                            Foreground="{StaticResource FontColor}"
+                                            Text="{Binding Path=DisplayName}" />
+                                    </StackPanel>
+                                    <HierarchicalDataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsExpanded}" Value="True">
+                                            <Setter TargetName="imageRect" Property="OpacityMask">
+                                                <Setter.Value>
+                                                    <ImageBrush ImageSource="/FrostyEditor;component/Images/OpenFolder.png" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsRoot}" Value="True">
+                                            <Setter TargetName="imageRect" Property="OpacityMask">
+                                                <Setter.Value>
+                                                    <ImageBrush ImageSource="/FrostyEditor;component/Images/Database.png" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </HierarchicalDataTemplate.Triggers>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+
+                        <GridSplitter
+                            x:Name="gs"
+                            Grid.Row="2"
+                            Height="3"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Bottom"
+                            Background="{StaticResource ControlBackground}"
+                            ResizeDirection="Rows" />
+
+                        <ListView
+                            x:Name="PART_AssetListView"
+                            Grid.Row="3"
+                            HorizontalContentAlignment="Stretch"
+                            SelectionMode="Single" />
+                        <Grid Grid.Row="2" Visibility="Hidden">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid x:Name="gridHelper1" Grid.Column="0" />
+                            <Grid x:Name="gridHelper2" Grid.Column="1" />
+                        </Grid>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ToolbarVisible" Value="True">
+                            <Setter TargetName="toolbarRow" Property="Height" Value="26" />
+                        </Trigger>
+                        <Trigger Property="AssetListVisible" Value="False">
+                            <Setter TargetName="gs" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="PART_AssetListView" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Property Grid Item  -->
+    <ControlTemplate x:Key="itemToggleButton" TargetType="{x:Type ToggleButton}">
+        <Border
+            Width="16"
+            Height="16"
+            Padding="5"
+            Background="Transparent">
+            <Path
+                x:Name="ExpandPath"
+                Fill="{DynamicResource ControlPressed}"
+                Stroke="{DynamicResource ControlPressed}">
+                <Path.Data>
+                    <PathGeometry Figures="M0,0 L0,6 L6,0 z" />
+                </Path.Data>
+                <Path.RenderTransform>
+                    <RotateTransform Angle="135" CenterX="3" CenterY="3" />
+                </Path.RenderTransform>
+            </Path>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="ExpandPath" Property="RenderTransform">
+                    <Setter.Value>
+                        <RotateTransform Angle="180" CenterX="3" CenterY="3" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <ControlTemplate x:Key="categoryToggleButton" TargetType="{x:Type ToggleButton}">
+        <Border
+            Width="9"
+            Height="9"
+            Background="White"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <Grid>
+                <Path
+                    x:Name="expanded"
+                    Width="7"
+                    Height="7"
+                    Data="M1 4 L1 4 6 4 6 3 1 3"
+                    Fill="Black" />
+                <Path
+                    x:Name="collapsed"
+                    Width="7"
+                    Height="7"
+                    Data="M3 1 L3 1 3 6 4 6 4 1"
+                    Fill="Black" />
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="collapsed" Property="Visibility" Value="Collapsed" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <Style x:Key="propertyGridTreeViewItem" TargetType="{x:Type local:FrostyPropertyGridItem}">
+        <Style.Resources>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style TargetType="{x:Type CheckBox}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type CheckBox}">
+                            <Grid
+                                x:Name="templateRoot"
+                                Background="Transparent"
+                                SnapsToDevicePixels="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border
+                                    x:Name="checkBoxBorder"
+                                    Width="13"
+                                    Height="13"
+                                    Margin="1"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    BorderBrush="#868686"
+                                    BorderThickness="1">
+                                    <Grid x:Name="markGrid">
+                                        <Path
+                                            x:Name="optionMark"
+                                            Width="12"
+                                            Height="12"
+                                            Data="M1 8 L1 8 2 6 5 8 7 1 10 3 6 10"
+                                            Fill="#fafafa"
+                                            Opacity="0" />
+                                        <Rectangle
+                                            x:Name="indeterminateMark"
+                                            Margin="2"
+                                            Fill="{StaticResource FontColor}"
+                                            Opacity="0" />
+                                    </Grid>
+                                </Border>
+                                <ContentPresenter
+                                    x:Name="contentPresenter"
+                                    Grid.Column="1"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    Focusable="False"
+                                    RecognizesAccessKey="True"
+                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="optionMark" Property="Opacity" Value="1" />
+                                    <Setter TargetName="indeterminateMark" Property="Opacity" Value="0" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="{x:Null}">
+                                    <Setter TargetName="optionMark" Property="Opacity" Value="0" />
+                                    <Setter TargetName="indeterminateMark" Property="Opacity" Value="1" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="checkBoxBorder" Property="Opacity" Value="0.5" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="{x:Type TextBoxBase}">
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Background" Value="{StaticResource WindowBackground}" />
+                <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                <Setter Property="CaretBrush" Value="{StaticResource FontColor}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TextBox}">
+                            <Border
+                                x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{StaticResource ControlBackground}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                                <Grid>
+                                    <ScrollViewer
+                                        x:Name="PART_ContentHost"
+                                        Padding="0"
+                                        Focusable="True"
+                                        HorizontalScrollBarVisibility="Hidden"
+                                        VerticalScrollBarVisibility="Hidden"
+                                        Visibility="Hidden" />
+                                    <TextBlock
+                                        x:Name="PART_EllipsedText"
+                                        Margin="2,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Cursor="IBeam"
+                                        Focusable="True"
+                                        Text="{Binding Path=Text, RelativeSource={RelativeSource AncestorType={x:Type TextBox}}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="PART_ContentHost" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="PART_EllipsedText" Property="Visibility" Value="Hidden" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style BasedOn="{StaticResource {x:Type TextBoxBase}}" TargetType="{x:Type TextBox}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                <Setter Property="Margin" Value="-2,0" />
+                <Setter Property="CaretBrush" Value="{StaticResource FontColor}" />
+                <Setter Property="SelectionBrush" Value="{StaticResource ControlBackground}" />
+                <Setter Property="SelectionOpacity" Value="0.5" />
+            </Style>
+            <Style TargetType="{x:Type ComboBox}">
+                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+                <Setter Property="ScrollViewer.PanningMode" Value="Both" />
+                <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
+                <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ComboBox}">
+                            <Border
+                                Background="{StaticResource WindowBackground}"
+                                BorderBrush="#868686"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                                <Grid x:Name="templateRoot" SnapsToDevicePixels="True">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="19" />
+                                    </Grid.ColumnDefinitions>
+                                    <Popup
+                                        x:Name="PART_Popup"
+                                        Grid.ColumnSpan="2"
+                                        Margin="1"
+                                        AllowsTransparency="true"
+                                        Focusable="False"
+                                        IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Placement="Bottom"
+                                        PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}">
+                                        <Border
+                                            x:Name="dropDownBorder"
+                                            Width="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                            MaxHeight="200">
+                                            <ScrollViewer x:Name="DropDownScrollViewer">
+                                                <Grid x:Name="grid" RenderOptions.ClearTypeHint="Enabled">
+                                                    <Canvas
+                                                        x:Name="canvas"
+                                                        Width="0"
+                                                        Height="0"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Top">
+                                                        <Rectangle
+                                                            x:Name="opaqueRect"
+                                                            Width="{Binding ActualWidth, ElementName=dropDownBorder}"
+                                                            Height="{Binding ActualHeight, ElementName=dropDownBorder}"
+                                                            Fill="{StaticResource ListBackground}" />
+                                                    </Canvas>
+                                                    <ItemsPresenter
+                                                        x:Name="ItemsPresenter"
+                                                        KeyboardNavigation.DirectionalNavigation="Contained"
+                                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                </Grid>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                    <ToggleButton
+                                        x:Name="toggleButton"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Stretch"
+                                        IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                <Border
+                                                    x:Name="border"
+                                                    Margin="1"
+                                                    Background="{StaticResource ControlBackground}">
+                                                    <Path
+                                                        Width="17"
+                                                        Height="17"
+                                                        Data="M5 6 L5 6 13 6 9 11 Z"
+                                                        Fill="White" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="border" Property="Background" Value="{StaticResource ControlHighlight}" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="border" Property="Background" Value="{StaticResource ControlPressed}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+
+                                    <ContentPresenter
+                                        x:Name="contentPresenter"
+                                        Margin="{TemplateBinding Padding}"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        Content="{TemplateBinding SelectionBoxItem}"
+                                        ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                        ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                        Focusable="False"
+                                        IsHitTestVisible="false"
+                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+                                    <ToggleButton
+                                        x:Name="invisToggleButton"
+                                        Focusable="False"
+                                        IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                <Border Background="Transparent" />
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                <Setter Property="Background" Value="{StaticResource ControlBackground}" />
+                <Setter Property="Padding" Value="2" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border
+                                x:Name="buttonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0">
+                                <ContentPresenter
+                                    x:Name="content"
+                                    Margin="{TemplateBinding Padding}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="buttonBorder" Property="Background" Value="#FF707070" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="buttonBorder" Property="Background" Value="#FF585858" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="content" Property="Opacity" Value="0.5" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Style.Resources>
+        <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded}" />
+        <Setter Property="ItemsSource" Value="{Binding Path=Children}" />
+        <Setter Property="IsTabStop" Value="True" />
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="KeyboardNavigation.IsTabStop" Value="True" />
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="Continue" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyPropertyGridItem}">
+                    <ControlTemplate.Resources>
+                        <local:FrostyItemValuePaddingIncreaser x:Key="FrostyArrayPaddingIncreaser" />
+                        <local:FrostyArrayToVisibilityConverter x:Key="FrostyArrayToVisibilityConverter" />
+                        <local:FrostyValueModifiedConverter x:Key="FrostyValueModifiedConverter" />
+                    </ControlTemplate.Resources>
+                    <Grid
+                        x:Name="mainGrid"
+                        MinHeight="19"
+                        Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="19" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!--  Standard  -->
+                        <Grid x:Name="g1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{Binding ActualWidth, ElementName=NameBorder}" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding Path=Padding.Left, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}" />
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleButton
+                                    x:Name="PART_Expander"
+                                    Grid.Column="1"
+                                    MaxWidth="16"
+                                    Margin="0,1,0,0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    ClickMode="Press"
+                                    Focusable="False"
+                                    IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Template="{StaticResource itemToggleButton}"
+                                    Visibility="{Binding Path=HasItems, Converter={StaticResource FrostyArrayToVisibilityConverter}}" />
+
+                                <Grid Grid.Column="2">
+                                    <ContentControl
+                                        x:Name="PART_Name"
+                                        Margin="2,0,2,0"
+                                        Padding="{Binding Path=Padding, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        Focusable="False">
+                                        <local:FrostyHightlightTextBlock
+                                            FontFamily="Global User Interface"
+                                            FontWeight="{Binding Path=IsModified, Converter={StaticResource FrostyValueModifiedConverter}}"
+                                            Foreground="#DADADA"
+                                            HighlightText="{Binding Path=FilterText, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyPropertyGrid}}}"
+                                            Text="{Binding Path=DisplayName}" />
+                                    </ContentControl>
+                                </Grid>
+
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SubItemHighlight}" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type TreeViewItem}}}" Value="True">
+                                                <!--  2026/01/24  -->
+                                                <!--  Change marker  -->
+                                                <!--<Setter Property="Background" Value="{StaticResource SubItemHighlight}" />-->
+                                                <Setter Property="Background" Value="{StaticResource SubItemPressed}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                            </Grid>
+
+                            <Grid
+                                Grid.Column="1"
+                                Height="19"
+                                VerticalAlignment="Top">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition x:Name="arrayColumn" Width="0" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentControl
+                                        x:Name="PART_Value"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Focusable="False"
+                                        Foreground="#f7f7f7" />
+                                    <Button
+                                        x:Name="PART_ArrayRemoveButton"
+                                        Grid.Column="1"
+                                        Width="17"
+                                        Margin="1"
+                                        Padding="0"
+                                        ToolTip="Remove item"
+                                        Visibility="Collapsed">
+                                        <Button.Content>
+                                            <Path
+                                                Width="10"
+                                                Height="10"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Data="{Binding Path=Data, Source={StaticResource RemoveButtonIcon}}"
+                                                Fill="#f7f7f7"
+                                                Stretch="Uniform" />
+                                        </Button.Content>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+
+                        </Grid>
+
+                        <!--  Category  -->
+                        <Grid x:Name="g2" Visibility="Collapsed">
+                            <Grid Background="#3f3f3f">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding Path=Padding.Left, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}" />
+                                    <ColumnDefinition Width="24" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleButton
+                                    Grid.Column="1"
+                                    Width="9"
+                                    Height="9"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    ClickMode="Press"
+                                    Focusable="False"
+                                    IsChecked="{Binding Path=IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Template="{StaticResource categoryToggleButton}"
+                                    Visibility="{Binding Path=HasItems, Converter={StaticResource FrostyArrayToVisibilityConverter}}" />
+
+                                <Grid Grid.Column="2">
+                                    <ContentControl
+                                        Margin="2,0,2,0"
+                                        Padding="{Binding Path=Padding, RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Center"
+                                        Focusable="False">
+                                        <TextBlock
+                                            FontFamily="Global User Interface"
+                                            FontWeight="Bold"
+                                            Foreground="#DADADA"
+                                            Text="{Binding Path=DisplayName}" />
+                                    </ContentControl>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <!--  Children  -->
+                        <ContentControl
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2">
+                            <ContentControl.Padding>
+                                <MultiBinding Converter="{StaticResource FrostyArrayPaddingIncreaser}">
+                                    <Binding Path="Padding" RelativeSource="{RelativeSource AncestorType={x:Type ContentControl}}" />
+                                    <Binding Path="IsCategory" />
+                                </MultiBinding>
+                            </ContentControl.Padding>
+                            <ItemsPresenter
+                                x:Name="ItemsHost"
+                                KeyboardNavigation.IsTabStop="False"
+                                UseLayoutRounding="True"
+                                Visibility="Collapsed" />
+                        </ContentControl>
+
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsHidden}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Path=IsCategory}" Value="True">
+                            <Setter TargetName="g1" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="PART_Value" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="g2" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding Path=IsArrayChild}" Value="True" />
+                                <Condition Binding="{Binding Path=Parent.IsEnabled}" Value="True" />
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter TargetName="arrayColumn" Property="Width" Value="19" />
+                                <Setter TargetName="PART_ArrayRemoveButton" Property="Visibility" Value="Visible" />
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  Property Grid  -->
+    <Style TargetType="{x:Type local:FrostyPropertyGrid}">
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyPropertyGrid}">
+                    <ControlTemplate.Resources>
+                        <local:FrostyObjectTypeConverter x:Key="FrostyObjectTypeConverter" />
+                        <local:FrostyClassNameConverter x:Key="FrostyClassNameConverter" />
+                    </ControlTemplate.Resources>
+                    <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="0,2,0,0">
+                        <Grid Background="#141414">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="26" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition />
+                                <RowDefinition x:Name="classViewRow" Height="80" />
+                            </Grid.RowDefinitions>
+
+                            <DockPanel Grid.Row="0" LastChildFill="True">
+                                <Border Margin="1,1,1,1" Background="Transparent">
+                                    <ctrl:FrostyWatermarkTextBox
+                                        x:Name="PART_FilterTextBox"
+                                        Height="24"
+                                        Padding="4,0,0,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        BorderThickness="1"
+                                        WatermarkText="Filter" />
+                                </Border>
+                            </DockPanel>
+
+                            <Grid Grid.Row="1">
+                                <ProgressBar
+                                    x:Name="PART_FilterProgressBar"
+                                    Height="3"
+                                    HorizontalAlignment="Stretch"
+                                    IsIndeterminate="True"
+                                    Visibility="Collapsed" />
+                            </Grid>
+
+                            <Grid Grid.Row="2">
+                                <local:FrostyPropertyGridTreeView
+                                    x:Name="tv"
+                                    Grid.ColumnSpan="2"
+                                    Padding="0"
+                                    VerticalAlignment="Top"
+                                    Background="Transparent"
+                                    Focusable="True"
+                                    IsTabStop="True"
+                                    ItemContainerStyle="{StaticResource propertyGridTreeViewItem}"
+                                    KeyboardNavigation.IsTabStop="True"
+                                    KeyboardNavigation.TabNavigation="Continue"
+                                    ScrollViewer.IsDeferredScrollingEnabled="False"
+                                    VirtualizingPanel.IsVirtualizing="True"
+                                    VirtualizingStackPanel.VirtualizationMode="Standard">
+                                    <local:FrostyPropertyGridTreeView.Template>
+                                        <ControlTemplate TargetType="{x:Type TreeView}">
+                                            <Border x:Name="Bd" SnapsToDevicePixels="True">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition x:Name="resizeColumn" Width="{Binding Path=InitialWidth, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyPropertyGrid}}}" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border x:Name="NameBorder" Background="#292929" />
+                                                    <Border Grid.Column="1" Background="#141414" />
+                                                    <Grid Grid.ColumnSpan="2">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="*" />
+                                                            <RowDefinition Height="2" />
+                                                        </Grid.RowDefinitions>
+                                                        <ScrollViewer
+                                                            x:Name="_tv_scrollviewer_"
+                                                            Padding="{TemplateBinding Padding}"
+                                                            Background="{TemplateBinding Background}"
+                                                            CanContentScroll="False"
+                                                            Focusable="False"
+                                                            HorizontalScrollBarVisibility="Disabled"
+                                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                            VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
+                                                            <ItemsPresenter />
+                                                        </ScrollViewer>
+                                                        <Border
+                                                            Grid.Row="1"
+                                                            Height="2"
+                                                            HorizontalAlignment="Stretch"
+                                                            Background="#3f3f3f" />
+                                                    </Grid>
+                                                    <GridSplitter
+                                                        Grid.Column="1"
+                                                        Width="2"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Stretch"
+                                                        Background="#3f3f3f" />
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+                                                </Trigger>
+                                                <Trigger Property="VirtualizingPanel.IsVirtualizing" Value="True">
+                                                    <Setter TargetName="_tv_scrollviewer_" Property="CanContentScroll" Value="True" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </local:FrostyPropertyGridTreeView.Template>
+                                </local:FrostyPropertyGridTreeView>
+                                <Border
+                                    x:Name="PART_FilterInProgresBorder"
+                                    Background="{StaticResource ControlBackground}"
+                                    Opacity="0.25"
+                                    Visibility="Collapsed">
+                                    <Grid>
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Global User Interface"
+                                            FontSize="70"
+                                            Text="Filter in progress" />
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <Grid x:Name="classViewGrid" Grid.Row="3">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="19" />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+
+                                <Border Background="#454545">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="18" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock
+                                            Margin="7,0,0,0"
+                                            VerticalAlignment="Top"
+                                            FontWeight="Bold">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource FrostyObjectTypeConverter}" ConverterParameter="Name">
+                                                    <Binding Path="Object" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                    <Binding ElementName="tv" Path="SelectedItem" />
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                        <Path
+                                            Grid.Column="1"
+                                            Width="11"
+                                            Height="11"
+                                            Data="m 4 9 h 2 v 2 H 4 Z M 1 4 V 1 H 2 V 0 H 8 V 1 H 9 V 6 H 8 V 7 H 6 V 8 H 4 V 6 H 5 V 5 H 7 V 2 H 3 v 2 z"
+                                            Fill="White" />
+                                    </Grid>
+                                </Border>
+
+                                <Grid Grid.Row="1">
+                                    <TextBox
+                                        Padding="4"
+                                        IsReadOnly="True"
+                                        TextWrapping="Wrap"
+                                        VerticalScrollBarVisibility="Auto">
+                                        <TextBox.Text>
+                                            <MultiBinding Converter="{StaticResource FrostyObjectTypeConverter}" ConverterParameter="Description">
+                                                <Binding
+                                                    Mode="OneWay"
+                                                    Path="Object"
+                                                    RelativeSource="{RelativeSource TemplatedParent}" />
+                                                <Binding
+                                                    ElementName="tv"
+                                                    Mode="OneWay"
+                                                    Path="SelectedItem" />
+                                            </MultiBinding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </Grid>
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ClassViewVisible" Value="False">
+                            <Setter TargetName="classViewRow" Property="Height" Value="0" />
+                            <Setter TargetName="classViewGrid" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  FrostyPropertyGrid Type Editors  -->
+    <Style TargetType="{x:Type editors:FrostyPointerRefControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyPointerRefControl}">
+                    <ControlTemplate.Resources>
+                        <conv:StringToBitmapSourceConverter x:Key="stringToBitmapConverter" />
+                        <editors:ClassTypeToStringConverter x:Key="classTypeToStringConverter" />
+                        <conv:AssetEntryToBitmapSourceConverter x:Key="AssetEntryToBitmapSourceConverter" />
+                        <editors:RefTypeToStringConverter x:Key="RefTypeToStringConverter" />
+                        <Style x:Key="MenuButtonStyle" TargetType="{x:Type Button}">
+                            <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Padding" Value="2" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type Button}">
+                                        <Border
+                                            x:Name="buttonBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="0"
+                                            CornerRadius="0">
+                                            <ContentPresenter
+                                                x:Name="content"
+                                                Margin="{TemplateBinding Padding}"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="buttonBorder" Property="Background" Value="#FF707070" />
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="buttonBorder" Property="Background" Value="#FF585858" />
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="content" Property="Opacity" Value="0.5" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ControlTemplate.Resources>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition x:Name="buttonColumn" Width="19" />
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox
+                            x:Name="PART_Popup"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            VirtualizingPanel.VirtualizationMode="Recycling">
+                            <ComboBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ComboBox.ItemsPanel>
+
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="18">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition MinWidth="260" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="MS Reference Sans Serif"
+                                            Foreground="{StaticResource FontColor}"
+                                            Text="{Binding Path=., Converter={StaticResource classTypeToStringConverter}, ConverterParameter=Name}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Consolas"
+                                            Foreground="{StaticResource FontColor}"
+                                            Text="{Binding Path=., Converter={StaticResource classTypeToStringConverter}, ConverterParameter=Guid}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+
+                            <ComboBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ComboBoxItem}">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource SubItemHighlight}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.ItemContainerStyle>
+
+                            <ComboBox.Template>
+                                <ControlTemplate TargetType="{x:Type ComboBox}">
+                                    <Grid>
+                                        <Popup
+                                            x:Name="PART_PopupMenu"
+                                            Grid.ColumnSpan="2"
+                                            Margin="1"
+                                            AllowsTransparency="true"
+                                            Focusable="False"
+                                            IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                            Placement="Bottom"
+                                            PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}">
+                                            <Border
+                                                x:Name="dropDownBorder"
+                                                Width="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                                BorderBrush="{StaticResource ControlBackground}"
+                                                BorderThickness="1">
+                                                <Grid>
+                                                    <StackPanel
+                                                        Grid.Row="0"
+                                                        MaxHeight="330"
+                                                        Background="{StaticResource ListBackground}"
+                                                        Orientation="Vertical">
+                                                        <Button
+                                                            x:Name="PART_ClearButton"
+                                                            Height="22"
+                                                            Content="Clear assigned object"
+                                                            FontFamily="MS Reference Sans Serif"
+                                                            Style="{StaticResource MenuButtonStyle}" />
+                                                        <Button
+                                                            x:Name="PART_OpenButton"
+                                                            Height="22"
+                                                            Content="Open asset"
+                                                            FontFamily="MS Reference Sans Serif"
+                                                            Style="{StaticResource MenuButtonStyle}" />
+                                                        <Button
+                                                            x:Name="PART_FindButton"
+                                                            Height="22"
+                                                            Content="Find in data explorer"
+                                                            FontFamily="MS Reference Sans Serif"
+                                                            Style="{StaticResource MenuButtonStyle}" />
+                                                        <Button
+                                                            x:Name="PART_CreateButton"
+                                                            Height="22"
+                                                            Content="Create new ..."
+                                                            FontFamily="MS Reference Sans Serif"
+                                                            Style="{StaticResource MenuButtonStyle}" />
+
+                                                        <Border x:Name="PART_Separator" Height="22">
+                                                            <Separator Margin="1,0,1,0" />
+                                                        </Border>
+
+                                                        <ctrl:FrostyWatermarkTextBox
+                                                            x:Name="PART_FilterTextBox"
+                                                            Height="24"
+                                                            Margin="2,-8,1,2"
+                                                            VerticalContentAlignment="Center"
+                                                            BorderThickness="1"
+                                                            WatermarkText="Filter" />
+
+                                                        <Border x:Name="PART_TBBorder" Height="22">
+                                                            <TextBlock
+                                                                x:Name="PART_TextBlock"
+                                                                Margin="4,0,0,0"
+                                                                VerticalAlignment="Center"
+                                                                FontFamily="MS Reference Sans Serif"
+                                                                Foreground="{StaticResource FontColor}"
+                                                                Opacity="0.5"
+                                                                Text="Select Class" />
+                                                        </Border>
+
+                                                        <ScrollViewer x:Name="DropDownScrollViewer" MaxHeight="198">
+                                                            <Grid
+                                                                x:Name="grid"
+                                                                HorizontalAlignment="Stretch"
+                                                                RenderOptions.ClearTypeHint="Enabled">
+                                                                <ItemsPresenter
+                                                                    x:Name="ItemsPresenter"
+                                                                    KeyboardNavigation.DirectionalNavigation="Contained"
+                                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                            </Grid>
+                                                        </ScrollViewer>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </Popup>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ComboBox.Template>
+                        </ComboBox>
+
+                        <Grid x:Name="refStackPanel" Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button
+                                x:Name="PART_AssignButton"
+                                Grid.Column="0"
+                                Width="12"
+                                Height="12"
+                                Margin="0,0,4,0"
+                                Padding="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="0"
+                                IsEnabled="{Binding Path=IsEnabled, RelativeSource={RelativeSource TemplatedParent}}"
+                                ToolTip="Assign from selected asset">
+                                <Button.Content>
+                                    <Path
+                                        Width="10"
+                                        Height="10"
+                                        Margin="0,0,0,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Data="{Binding Path=Data, Source={StaticResource AssignIcon}}"
+                                        Fill="#f7f7f7"
+                                        Stretch="Uniform" />
+                                </Button.Content>
+                            </Button>
+
+                            <Image
+                                x:Name="PART_TypeImage"
+                                Grid.Column="1"
+                                Width="12"
+                                Height="12"
+                                Margin="0,0,4,0"
+                                Source="{Binding Path=RefType, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource AssetEntryToBitmapSourceConverter}}"
+                                ToolTip="{Binding Path=RefType, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource RefTypeToStringConverter}}" />
+
+                            <TextBlock
+                                x:Name="PART_RefName"
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Text="{Binding Path=RefValueName, RelativeSource={RelativeSource TemplatedParent}}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap"
+                                ToolTip="{Binding Path=RefTooltip, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <TextBlock
+                                x:Name="refValuePath"
+                                Grid.Column="3"
+                                Margin="4,0,0,0"
+                                VerticalAlignment="Center"
+                                Opacity="0.5"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap">
+                                <TextBlock.Text>
+                                    <Binding
+                                        Path="RefValuePath"
+                                        RelativeSource="{RelativeSource TemplatedParent}"
+                                        StringFormat="({0})" />
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </Grid>
+
+                        <Button
+                            x:Name="PART_MoreOptionsButton"
+                            Grid.Column="1"
+                            Width="17"
+                            Margin="1"
+                            IsEnabled="{Binding Path=IsEnabled, RelativeSource={RelativeSource TemplatedParent}}"
+                            ToolTip="Show more options">
+                            <Button.Content>
+                                <Image Width="14" Source="/FrostyEditor;component/Images/More.png" />
+                            </Button.Content>
+                        </Button>
+
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="RefValuePath" Value="">
+                            <Setter TargetName="refValuePath" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="PART_TypeImage" Property="Opacity" Value="0.5" />
+                            <Setter TargetName="PART_RefName" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyArrayControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyArrayControl}">
+                    <Grid Height="19">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="17" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="19" />
+                            <ColumnDefinition Width="19" />
+                        </Grid.ColumnDefinitions>
+
+                        <Path
+                            x:Name="path"
+                            Grid.Column="0"
+                            Width="14"
+                            Height="16"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Data="                               M0 0 L0 0 12 0 12 2 0 2 Z                               M0 4 L0 4 12 4 12 6 0 6 Z                               M0 8 L0 8 12 8 12 10 0 10 Z                               M0 12 L0 12 12 12 12 14 0 14 Z                               "
+                            Fill="#f7f7f7"
+                            Stretch="None" />
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            TextTrimming="CharacterEllipsis">
+                            <TextBlock.Text>
+                                <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}">
+                                    <Binding.StringFormat>({0} items)</Binding.StringFormat>
+                                </Binding>
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <Button
+                            x:Name="PART_RemoveButton"
+                            Grid.Column="2"
+                            Width="17"
+                            Margin="1"
+                            Padding="0"
+                            IsEnabled="True"
+                            ToolTip="Remove all items">
+                            <Button.Content>
+                                <Path
+                                    Width="10"
+                                    Height="10"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="{Binding Path=Data, Source={StaticResource RemoveButtonIcon}}"
+                                    Fill="#f7f7f7"
+                                    Stretch="Uniform" />
+                            </Button.Content>
+                        </Button>
+                        <Button
+                            x:Name="PART_AddButton"
+                            Grid.Column="3"
+                            Width="17"
+                            Margin="1"
+                            ToolTip="Add new item">
+                            <Button.Content>
+                                <Path
+                                    Width="10"
+                                    Height="10"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Data="{Binding Path=Data, Source={StaticResource AddButtonIcon}}"
+                                    Fill="#f7f7f7"
+                                    Stretch="Uniform" />
+                            </Button.Content>
+                        </Button>
+
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="path" Property="Fill" Value="#595959" />
+                        </Trigger>
+                        <Trigger Property="Value" Value="0">
+                            <Setter TargetName="PART_RemoveButton" Property="IsEnabled" Value="False" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyBlobControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyBlobControl}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="44" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource FontColor}">
+                            <TextBlock.Text>
+                                <Binding Path="Value.Count" StringFormat="({0} bytes)" />
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button
+                                x:Name="PART_ExportButton"
+                                Width="44"
+                                Height="20"
+                                Margin="1,0,1,0"
+                                Content="Export" />
+                        </StackPanel>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyVectorControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyVectorControl}">
+                    <Grid Height="19">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition x:Name="gridZ" Width="*" />
+                            <ColumnDefinition x:Name="gridW" Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <DockPanel
+                            x:Name="blockX"
+                            Grid.Column="0"
+                            HorizontalAlignment="Stretch">
+                            <Border
+                                Background="#802020"
+                                BorderBrush="{StaticResource ControlBackground}"
+                                BorderThickness="1,1,0,1">
+                                <TextBlock
+                                    Margin="5,0,5,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource FontColor}"
+                                    Text="{Binding Path=XLabel, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="1">
+                                <TextBox
+                                    x:Name="PART_X"
+                                    Margin="3,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Path=X, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                        </DockPanel>
+
+                        <DockPanel
+                            x:Name="blockY"
+                            Grid.Column="1"
+                            Margin="1,0,0,0"
+                            HorizontalAlignment="Stretch">
+                            <Border
+                                Background="#208020"
+                                BorderBrush="{StaticResource ControlBackground}"
+                                BorderThickness="1,1,0,1">
+                                <TextBlock
+                                    Margin="5,0,5,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource FontColor}"
+                                    Text="{Binding Path=YLabel, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="1">
+                                <TextBox
+                                    x:Name="PART_Y"
+                                    Margin="3,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Path=Y, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                        </DockPanel>
+
+                        <DockPanel
+                            x:Name="blockZ"
+                            Grid.Column="2"
+                            Margin="1,0,0,0"
+                            HorizontalAlignment="Stretch">
+                            <Border
+                                Background="#005080"
+                                BorderBrush="{StaticResource ControlBackground}"
+                                BorderThickness="1,1,0,1">
+                                <TextBlock
+                                    Margin="5,0,5,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource FontColor}"
+                                    Text="{Binding Path=ZLabel, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="1">
+                                <TextBox
+                                    x:Name="PART_Z"
+                                    Margin="3,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Path=Z, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                        </DockPanel>
+
+                        <DockPanel
+                            x:Name="blockW"
+                            Grid.Column="3"
+                            Margin="1,0,0,0"
+                            HorizontalAlignment="Stretch">
+                            <Border
+                                Background="#808080"
+                                BorderBrush="{StaticResource ControlBackground}"
+                                BorderThickness="1,1,0,1">
+                                <TextBlock
+                                    Margin="5,0,5,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Foreground="{StaticResource FontColor}"
+                                    Text="{Binding Path=WLabel, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                            <Border BorderBrush="{StaticResource ControlBackground}" BorderThickness="1">
+                                <TextBox
+                                    x:Name="PART_W"
+                                    Margin="3,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Path=W, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Border>
+                        </DockPanel>
+
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="ControlType" Value="Vec2">
+                            <Setter TargetName="blockZ" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="blockW" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="gridZ" Property="Width" Value="0" />
+                            <Setter TargetName="gridW" Property="Width" Value="0" />
+                        </Trigger>
+                        <Trigger Property="ControlType" Value="Vec3">
+                            <Setter TargetName="blockW" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="gridW" Property="Width" Value="0" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style BasedOn="{StaticResource {x:Type editors:FrostyVectorControl}}" TargetType="{x:Type editors:FrostyVec2Control}">
+        <Setter Property="ControlType" Value="Vec2" />
+    </Style>
+    <Style BasedOn="{StaticResource {x:Type editors:FrostyVectorControl}}" TargetType="{x:Type editors:FrostyVec3Control}">
+        <Setter Property="ControlType" Value="Vec3" />
+    </Style>
+    <Style BasedOn="{StaticResource {x:Type editors:FrostyVectorControl}}" TargetType="{x:Type editors:FrostyVec4Control}">
+        <Setter Property="ControlType" Value="Vec4" />
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyEnumControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyEnumControl}">
+                    <ComboBox
+                        x:Name="PART_ComboBox"
+                        Padding="0,0,2,0"
+                        BorderThickness="0" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyImagePathControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyImagePathControl}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="19" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            Grid.Column="0"
+                            Foreground="{StaticResource FontColor}"
+                            Text="{Binding Path=Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                            TextTrimming="CharacterEllipsis" />
+                        <Button
+                            x:Name="PART_BrowseButton"
+                            Grid.Column="1"
+                            Width="17"
+                            Margin="1">
+                            <Button.Content>
+                                <Image Width="14" Source="/FrostyEditor;component/Images/More.png" />
+                            </Button.Content>
+                        </Button>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyLocalizedStringReferenceControl}">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+        <Setter Property="CaretBrush" Value="{StaticResource FontColor}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Margin" Value="-2,0,0,0" />
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyCStringControl}">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource FontColor}" />
+        <Setter Property="CaretBrush" Value="{StaticResource FontColor}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Margin" Value="-2,0,0,0" />
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostyStructControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostyStructControl}">
+                    <Grid Height="19">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="17" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Path
+                            x:Name="path"
+                            Grid.Column="0"
+                            Width="14"
+                            Height="16"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Data="                               M0 0 L0 0 12 0 12 2 0 2 Z                               M5 4 L5 4 12 4 12 6 5 6 Z                               M5 8 L5 8 12 8 12 10 5 10 Z                               M5 12 L5 12 12 12 12 14 5 14 Z                               "
+                            Fill="#f7f7f7"
+                            Stretch="None" />
+                        <!--<TextBlock Grid.Column="1" Text="{Binding Path=Value, RelativeSource={RelativeSource TemplatedParent}}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />-->
+                        <TextBox
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            IsReadOnly="True"
+                            Text="{Binding Path=Value, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="path" Property="Fill" Value="#595959" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:FrostySliderControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:FrostySliderControl}">
+                    <Grid Height="19">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="3*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox VerticalAlignment="Center" Text="{Binding Path=Value, ElementName=slider}" />
+                        <Slider
+                            x:Name="slider"
+                            Grid.Column="1"
+                            IsSnapToTickEnabled="{Binding Path=IsSnapToTickEnabled, RelativeSource={RelativeSource TemplatedParent}}"
+                            LargeChange="{Binding Path=LargeChange, RelativeSource={RelativeSource TemplatedParent}}"
+                            Maximum="{Binding Path=Maximum, RelativeSource={RelativeSource TemplatedParent}}"
+                            Minimum="{Binding Path=Minimum, RelativeSource={RelativeSource TemplatedParent}}"
+                            SmallChange="{Binding Path=SmallChange, RelativeSource={RelativeSource TemplatedParent}}"
+                            Value="{Binding Path=Value, RelativeSource={RelativeSource TemplatedParent}}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  FrostyAssetEditor  -->
+    <Style TargetType="{x:Type local:FrostyAssetEditor}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyAssetEditor}">
+                    <ctrl:FrostyDockablePanel Title="Properties" Icon="/FrostyEditor;component/Images/Properties.png">
+                        <local:FrostyPropertyGrid
+                            x:Name="PART_AssetPropertyGrid"
+                            Asset="{Binding Asset, RelativeSource={RelativeSource TemplatedParent}}"
+                            Modified="{Binding AssetModified, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                    </ctrl:FrostyDockablePanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  FrostyClassSelector  -->
+    <Style TargetType="{x:Type local:FrostyClassSelector}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyClassSelector}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <ctrl:FrostyWatermarkTextBox
+                            x:Name="PART_FilterTextBox"
+                            Grid.Row="0"
+                            Margin="1"
+                            Padding="4,0,0,0"
+                            VerticalContentAlignment="Center"
+                            BorderThickness="1"
+                            WatermarkText="Filter" />
+                        <TreeView x:Name="PART_ModuleClassView" Grid.Row="1">
+                            <TreeView.Resources>
+                                <conv:StringToBitmapSourceConverter x:Key="StringToBitmapSourceConverter" />
+                            </TreeView.Resources>
+                            <TreeView.ItemContainerStyle>
+                                <Style BasedOn="{StaticResource baseTreeViewItemStyle}" TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+                                    <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </TreeView.ItemContainerStyle>
+                            <TreeView.ItemTemplate>
+                                <HierarchicalDataTemplate ItemsSource="{Binding Path=Classes}">
+                                    <StackPanel
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                        Orientation="Horizontal">
+                                        <Rectangle
+                                            x:Name="imageRect"
+                                            Grid.Column="0"
+                                            Width="16"
+                                            Height="16"
+                                            Margin="3,0,0,0"
+                                            Fill="{StaticResource FontColor}">
+                                            <Rectangle.OpacityMask>
+                                                <ImageBrush ImageSource="/FrostyEditor;component/Images/CloseFolder.png" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                        <TextBlock
+                                            Margin="6,0,0,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Global User Interface"
+                                            Foreground="{StaticResource FontColor}"
+                                            Text="{Binding Path=Name}" />
+                                    </StackPanel>
+                                    <HierarchicalDataTemplate.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Height="22"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal">
+                                                <Image
+                                                    x:Name="imageRect"
+                                                    Grid.Column="0"
+                                                    Width="16"
+                                                    Height="16"
+                                                    Margin="3,0,0,0"
+                                                    Source="{Binding Path=Name, Converter={StaticResource StringToBitmapSourceConverter}}" />
+                                                <TextBlock
+                                                    x:Name="name"
+                                                    Margin="6,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    FontFamily="Global User Interface"
+                                                    Foreground="{StaticResource FontColor}"
+                                                    Text="{Binding Path=Name}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </HierarchicalDataTemplate.ItemTemplate>
+                                    <HierarchicalDataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsExpanded}" Value="True">
+                                            <Setter TargetName="imageRect" Property="OpacityMask">
+                                                <Setter.Value>
+                                                    <ImageBrush ImageSource="/FrostyEditor;component/Images/OpenFolder.png" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </HierarchicalDataTemplate.Triggers>
+                                </HierarchicalDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style BasedOn="{StaticResource {x:Type editors:FrostyVectorControl}}" TargetType="{x:Type editors:FrostyRotationControl}">
+        <Setter Property="ControlType" Value="Vec3" />
+        <Setter Property="XLabel" Value="Y" />
+        <Setter Property="YLabel" Value="P" />
+        <Setter Property="ZLabel" Value="R" />
+    </Style>
+
+    <!--  FrostyAssetListView  -->
+    <Style TargetType="{x:Type local:FrostyAssetListView}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyAssetListView}">
+                    <ControlTemplate.Resources>
+                        <conv:AssetEntryToBitmapSourceConverter x:Key="AssetEntryToBitmapSourceConverter" />
+                    </ControlTemplate.Resources>
+                    <Grid>
+                        <ListView
+                            x:Name="PART_AssetListView"
+                            Grid.Row="3"
+                            HorizontalContentAlignment="Stretch"
+                            ItemsSource="{TemplateBinding ItemsSource}"
+                            SelectionMode="Single">
+                            <ListView.ItemContainerStyle>
+                                <Style BasedOn="{StaticResource baseListViewItemStyle}" TargetType="ListViewItem">
+                                    <Setter Property="ContextMenu" Value="{Binding Path=AssetContextMenu, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:FrostyAssetListView}}}" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                <Border x:Name="Border" Background="Transparent">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding Command="{Binding Path=DoubleClickCommand, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyAssetListView}}}" Gesture="LeftDoubleClick" />
+                                                    </Border.InputBindings>
+                                                    <GridViewRowPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource SubItemHighlight}" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource SubItemPressed}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Width="{Binding Path=ActualWidth, ElementName=gridHelper1}" HeaderTemplate="{StaticResource assetListViewAscendingSorting}">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="Name" Tag="DisplayName" />
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Height="22" Orientation="Horizontal">
+                                                    <Image
+                                                        x:Name="imageRect"
+                                                        Width="16"
+                                                        Height="16"
+                                                        Source="{Binding Path=., Converter={StaticResource AssetEntryToBitmapSourceConverter}}" />
+                                                    <TextBlock
+                                                        x:Name="displayName"
+                                                        Margin="6,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="MS Reference Sans Serif"
+                                                        FontWeight="Normal"
+                                                        Text="{Binding Path=DisplayName}" />
+                                                    <TextBlock
+                                                        x:Name="displayPath"
+                                                        Margin="6,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="MS Reference Sans Serif"
+                                                        FontWeight="Normal"
+                                                        Opacity="0.5">
+                                                        <TextBlock.Text>
+                                                            <Binding Path="Path" StringFormat="({0})" />
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsModified}" Value="True">
+                                                        <Setter TargetName="displayName" Property="FontWeight" Value="Bold" />
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Width="{Binding Path=ActualWidth, ElementName=gridHelper2}">
+                                        <GridViewColumn.Header>
+                                            <GridViewColumnHeader Content="Type" Tag="Type" />
+                                        </GridViewColumn.Header>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid Height="22">
+                                                    <TextBlock
+                                                        VerticalAlignment="Center"
+                                                        FontFamily="MS Reference Sans Serif"
+                                                        Text="{Binding Path=Type}" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                        <Grid IsHitTestVisible="False" Visibility="Hidden">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid x:Name="gridHelper1" Grid.Column="0" />
+                            <Grid x:Name="gridHelper2" Grid.Column="1" />
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  FrostyMessageBox  -->
+    <Style TargetType="{x:Type local:FrostyImportExportBox}">
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <DataTemplate.Resources>
+                        <cmd:ImportExportBoxClickCommand x:Key="ImportExportBoxClickCommand" />
+                    </DataTemplate.Resources>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="38" />
+                        </Grid.RowDefinitions>
+
+                        <local:FrostyPropertyGrid
+                            x:Name="PART_PropertyGrid"
+                            Grid.Row="0"
+                            ClassViewVisible="False"
+                            Classes="{Binding Path=OptionsData, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyImportExportBox}}}"
+                            InitialWidth="150" />
+
+                        <Border Grid.Row="1" Background="{StaticResource ListBackground}">
+                            <Grid Margin="8">
+                                <DockPanel LastChildFill="False">
+                                    <Button
+                                        x:Name="PART_CancelButton"
+                                        Width="75"
+                                        Command="{StaticResource ImportExportBoxClickCommand}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
+                                        Content="Cancel"
+                                        DockPanel.Dock="Left" />
+                                    <Button
+                                        x:Name="PART_ImportExportButton"
+                                        Width="75"
+                                        Command="{StaticResource ImportExportBoxClickCommand}"
+                                        CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
+                                        Content="Export"
+                                        DockPanel.Dock="Right" />
+                                </DockPanel>
+                            </Grid>
+                        </Border>
+
+                    </Grid>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=IsImport, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyImportExportBox}}}" Value="True">
+                            <Setter TargetName="PART_ImportExportButton" Property="Content" Value="Import" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <DrawingBrush
+        x:Key="gridBackground"
+        TileMode="Tile"
+        Viewport="0,0,64,64"
+        ViewportUnits="Absolute">
+        <DrawingBrush.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="#D4D4D4">
+                    <GeometryDrawing.Geometry>
+                        <RectangleGeometry Rect="0,0,1,1" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#9A9A9A" Geometry="M 0,0 L 0,0.5 0.5,0.5 0.5,0.5 0.5,0.5 0.5,0 Z" />
+                <GeometryDrawing Brush="#9A9A9A" Geometry="M 0.5,0.5 L 0.5,1 1,1 1,1 1,1 1,0.5 Z" />
+            </DrawingGroup>
+        </DrawingBrush.Drawing>
+    </DrawingBrush>
+
+    <!--  FrostyTextureViewer  -->
+    <Style TargetType="{x:Type local:FrostyTextureViewer}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FrostyTextureViewer}">
+                    <Grid
+                        x:Name="bkgnd"
+                        Grid.Row="1"
+                        Background="{StaticResource gridBackground}">
+                        <Viewbox>
+                            <local:FrostyViewport x:Name="PART_Renderer" />
+                        </Viewbox>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="GridVisible" Value="False">
+                            <Setter TargetName="bkgnd" Property="Background" Value="Black" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type editors:BaseCustomComboDataControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type editors:BaseCustomComboDataControl}">
+                    <ComboBox
+                        x:Name="PART_ComboBox"
+                        Padding="0,2,2,2"
+                        BorderThickness="0"
+                        ItemsSource="{Binding Path=Value.Names}"
+                        MaxDropDownHeight="350" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  FrostyExceptionBox  -->
+    <Style TargetType="{x:Type local:FrostyExceptionBox}">
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <DataTemplate.Resources>
+                        <ctrl:WindowCloseCommand x:Key="CloseCommand" />
+                    </DataTemplate.Resources>
+
+                    <Grid Background="{StaticResource ListBackground}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="38" />
+                        </Grid.RowDefinitions>
+
+                        <!--  Exception has occured text  -->
+                        <TextBlock
+                            Grid.Row="0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontFamily="Global User Interface"
+                            FontSize="14"
+                            Foreground="{StaticResource FontColor}"
+                            Text="An unhandled exception has occurred" />
+
+                        <!--  Crash text  -->
+                        <TextBox
+                            Grid.Row="1"
+                            Margin="8,0,8,0"
+                            Padding="4"
+                            BorderThickness="1"
+                            FontFamily="Consolas"
+                            HorizontalScrollBarVisibility="Auto"
+                            IsReadOnly="True"
+                            Text="{Binding ExceptionText, RelativeSource={RelativeSource AncestorType={x:Type local:FrostyExceptionBox}}}"
+                            VerticalScrollBarVisibility="Auto" />
+
+                        <!--  Ok button  -->
+                        <StackPanel
+                            Grid.Row="2"
+                            Margin="8"
+                            FlowDirection="RightToLeft"
+                            Orientation="Horizontal">
+                            <Button
+                                Width="75"
+                                Command="{StaticResource CloseCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}"
+                                Content="Ok" />
+                            <!--<Button x:Name="PART_ReportCrashButton" Content="Report Crash" Width="100" Margin="5,0,0,0"/>-->
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

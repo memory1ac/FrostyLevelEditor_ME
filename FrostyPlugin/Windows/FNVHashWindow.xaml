@@ -1,0 +1,100 @@
+<ctrl:FrostyDockableWindow
+    x:Class="Frosty.Core.Windows.FNVHashWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:Frosty.Controls;assembly=FrostyControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Frosty.Core.Windows"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="FNV Hash Calculator"
+    Width="400"
+    Height="220"
+    Background="{StaticResource WindowBackground}"
+    Foreground="{StaticResource FontColor}"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+
+    <ctrl:FrostyDockableWindow.Resources>
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Opacity" Value="0.5" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.7" />
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Opacity" Value="1.0" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </ctrl:FrostyDockableWindow.Resources>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel
+            Grid.Row="0"
+            Margin="5"
+            Background="#292929">
+            <DockPanel>
+                <CheckBox
+                    x:Name="CheckBox_LowercaseMode"
+                    Checked="CheckBox_LowercaseMode_Checked"
+                    Content="Lowercase Mode"
+                    DockPanel.Dock="Right"
+                    Unchecked="CheckBox_LowercaseMode_Unchecked" />
+                <TextBlock Margin="5" Text="FNV String" />
+            </DockPanel>
+            <TextBox
+                x:Name="TextBox_FnvString"
+                Margin="5"
+                Padding="5"
+                d:Text="Boolean"
+                BorderBrush="#868686"
+                BorderThickness="1" />
+
+            <UniformGrid Columns="2">
+                <StackPanel>
+                    <TextBlock Margin="5" Text="FNV Hash Base10" />
+                    <TextBox
+                        x:Name="TextBox_FnvHashId_10"
+                        Margin="5"
+                        Padding="5"
+                        d:Text="-1774669279"
+                        Background="#353535"
+                        BorderBrush="#868686"
+                        BorderThickness="1"
+                        Cursor="Arrow"
+                        IsReadOnly="True" />
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Margin="5" Text="FNV Hash Hex" />
+                    <TextBox
+                        x:Name="TextBox_FnvHashId_16"
+                        Margin="5"
+                        Padding="5"
+                        d:Text="9638B221"
+                        Background="#353535"
+                        BorderBrush="#868686"
+                        BorderThickness="1"
+                        Cursor="Arrow"
+                        IsReadOnly="True" />
+                </StackPanel>
+            </UniformGrid>
+        </StackPanel>
+
+        <Button
+            x:Name="Button_GetFnvHash"
+            Grid.Row="1"
+            Margin="5"
+            Padding="5,10"
+            Click="Button_GetFnvHash_Click"
+            Content="Apply FNV Hash" />
+    </Grid>
+
+</ctrl:FrostyDockableWindow>
