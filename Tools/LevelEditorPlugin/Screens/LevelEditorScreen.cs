@@ -380,6 +380,10 @@ public class SelectedEntityChangedEventArgs : EventArgs
 
 public class LevelEditorScreen : DeferredRenderScreen2
 {
+    // 对极小屏幕占比的实例进行统一裁剪，避免 CPU/GPU 在海量小物体上浪费开销
+    // 经验值：0.002 ~= 占屏幕宽高 0.2%
+    private const float MinScreenSizeCull = 0.002f;
+
     public bool ShowTaskWindow { get; set; }
 
     /// <summary>
@@ -668,6 +672,8 @@ public class LevelEditorScreen : DeferredRenderScreen2
     /// </summary>
     public override List<MeshRenderInstance> CollectMeshInstances()
     {
+        D3DUtils.BeginPerfEvent(Viewport.Context, "CollectMeshInstances_LevelEditor");
+
         LevelEditorCamera currentCamera = (LevelEditorCamera)camera;
         Matrix worldMatrix = currentCamera.WorldMatrix;
 
@@ -681,10 +687,15 @@ public class LevelEditorScreen : DeferredRenderScreen2
             float width = cameraFrustum.GetWidthAtDepth(dist);
             float height = cameraFrustum.GetHeightAtDepth(dist);
 
-            BoundingSphere bSphere = BoundingSphere.FromBox(proxy.BoundingBox);
+            // 使用缓存的包围球，避免每帧为每个 Proxy 重新 FromBox
+            BoundingSphere bSphere = proxy.BoundingSphere;
             float wratio = (bSphere.Radius * 2) / width;
             float hratio = (bSphere.Radius * 2) / height;
             float screenSize = (wratio > hratio) ? wratio : hratio;
+
+            // 全局极小物体裁剪：不依赖具体 Proxy，只看屏幕占比
+            if (screenSize < MinScreenSizeCull)
+                continue;
 
             if (proxy.ShouldRender(dist, screenSize))
             {
@@ -711,49 +722,81 @@ public class LevelEditorScreen : DeferredRenderScreen2
             }
         }
 
+        D3DUtils.EndPerfEvent(Viewport.Context);
+
         return instancesInView;
     }
 
     /// <summary>
     /// In solid color mode, SetMeshResPath mesh is added as bare MeshLodRenderable; shared LevelShader is set here before draw for pipeline switching with view mode.
+    /// 对延迟渲染路径进行按距离排序渲染，减小过度绘制；其它路径沿用基础实现。
     /// </summary>
     protected override void RenderMeshes(MeshRenderPath renderPath, List<MeshRenderInstance> meshList)
     {
-        D3DUtils.BeginPerfEvent(Viewport.Context, "RenderMeshes");
+        // 仅在延迟渲染路径上做类型 + 距离排序以提升 Early-Z 与状态切换效率
+        if (renderPath == MeshRenderPath.Deferred)
         {
-            foreach (MeshRenderInstance mesh in meshList)
+            D3DUtils.BeginPerfEvent(Viewport.Context, "RenderMeshes_Sorted");
             {
-                D3DUtils.BeginPerfEvent(Viewport.Context, mesh.RenderMesh.DebugName);
+                // 先按 RenderMesh 类型分组（Terrain -> Model -> 其它），再按距离从近到远排序
+                int GetRenderCategory(MeshRenderInstance inst)
                 {
-                    Matrix transform = mesh.Transform;
-                    transform.Transpose();
-
-                    functionConstants.UpdateData(Viewport.Context, new FunctionConstants()
-                    {
-                        WorldMatrix = Matrix.Scaling(-1, 1, 1) * transform,
-                        LightProbe1 = SHLightProbe[0],
-                        LightProbe2 = SHLightProbe[1],
-                        LightProbe3 = SHLightProbe[2],
-                        LightProbe4 = SHLightProbe[3],
-                        LightProbe5 = SHLightProbe[4],
-                        LightProbe6 = SHLightProbe[5],
-                        LightProbe7 = SHLightProbe[6],
-                        LightProbe8 = SHLightProbe[7],
-                        LightProbe9 = SHLightProbe[8],
-                    });
-
-                    Viewport.Context.VertexShader.SetConstantBuffer(1, functionConstants.Buffer);
-                    Viewport.Context.PixelShader.SetConstantBuffer(1, functionConstants.Buffer);
-
-                    if (mesh.RenderMesh is MeshLodRenderable)
-                        SolidColorMeshWrapper.SetSharedShaderState(Viewport.Context, renderPath);
-
-                    mesh.RenderMesh.Render(Viewport.Context, renderPath);
+                    if (inst.RenderMesh is TerrainRenderProxy) return 0;
+                    if (inst.RenderMesh is ModelRenderProxy) return 1;
+                    return 2;
                 }
-                D3DUtils.EndPerfEvent(Viewport.Context);
+
+                meshList.Sort((a, b) =>
+                {
+                    int ca = GetRenderCategory(a);
+                    int cb = GetRenderCategory(b);
+                    if (ca != cb)
+                        return ca.CompareTo(cb);
+
+                    float da = (a.RenderMesh as RenderProxy)?.CurrentDistanceToCamera ?? 0.0f;
+                    float db = (b.RenderMesh as RenderProxy)?.CurrentDistanceToCamera ?? 0.0f;
+                    return da.CompareTo(db);
+                });
+
+                foreach (MeshRenderInstance mesh in meshList)
+                {
+                    D3DUtils.BeginPerfEvent(Viewport.Context, mesh.RenderMesh.DebugName);
+                    {
+                        Matrix transform = mesh.Transform;
+                        transform.Transpose();
+
+                        functionConstants.UpdateData(Viewport.Context, new FunctionConstants()
+                        {
+                            WorldMatrix = Matrix.Scaling(-1, 1, 1) * transform,
+                            LightProbe1 = SHLightProbe[0],
+                            LightProbe2 = SHLightProbe[1],
+                            LightProbe3 = SHLightProbe[2],
+                            LightProbe4 = SHLightProbe[3],
+                            LightProbe5 = SHLightProbe[4],
+                            LightProbe6 = SHLightProbe[5],
+                            LightProbe7 = SHLightProbe[6],
+                            LightProbe8 = SHLightProbe[7],
+                            LightProbe9 = SHLightProbe[8],
+                        });
+
+                        Viewport.Context.VertexShader.SetConstantBuffer(1, functionConstants.Buffer);
+                        Viewport.Context.PixelShader.SetConstantBuffer(1, functionConstants.Buffer);
+
+                        if (mesh.RenderMesh is MeshLodRenderable)
+                            SolidColorMeshWrapper.SetSharedShaderState(Viewport.Context, renderPath);
+
+                        mesh.RenderMesh.Render(Viewport.Context, renderPath);
+                    }
+                    D3DUtils.EndPerfEvent(Viewport.Context);
+                }
             }
+            D3DUtils.EndPerfEvent(Viewport.Context);
         }
-        D3DUtils.EndPerfEvent(Viewport.Context);
+        else
+        {
+            // Forward / Shadows / Selection 路径保留基础行为（用于 Sprite、Gizmo 等）
+            base.RenderMeshes(renderPath, meshList);
+        }
     }
 
     protected List<MeshRenderInstance> GetSortedVisibleList()

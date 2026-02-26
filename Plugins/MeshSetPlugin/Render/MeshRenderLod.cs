@@ -1,4 +1,4 @@
-﻿using Frosty.Core;
+using Frosty.Core;
 using Frosty.Core.Viewport;
 using Frosty.Hash;
 using FrostySdk;
@@ -222,12 +222,8 @@ namespace MeshSetPlugin.Render
 
                 D3DUtils.BeginPerfEvent(context, section.DebugName);
                 {
-                    D3D11.RasterizerState oldState = context.Rasterizer.State;
-
                     section.SetState(context, renderPath);
                     section.Draw(context);
-
-                    context.Rasterizer.State = oldState;
                 }
                 D3DUtils.EndPerfEvent(context);
             }

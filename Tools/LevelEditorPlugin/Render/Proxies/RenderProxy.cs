@@ -14,6 +14,25 @@ public abstract class RenderProxy : MeshRenderBase
     public BoundingBox BoundingBox { get; protected set; }
     public Entity OwnerEntity { get; protected set; }
 
+    private BoundingSphere cachedBoundingSphere;
+    private bool boundingSphereDirty = true;
+
+    /// <summary>
+    /// 每个 Proxy 缓存一次包围球，避免在 CollectMeshInstances 中每帧重复从包围盒推导。
+    /// </summary>
+    public BoundingSphere BoundingSphere
+    {
+        get
+        {
+            if (boundingSphereDirty)
+            {
+                cachedBoundingSphere = BoundingSphere.FromBox(BoundingBox);
+                boundingSphereDirty = false;
+            }
+            return cachedBoundingSphere;
+        }
+    }
+
     public RenderProxy(ISpatialEntity owner)
     {
         OwnerEntity = owner as Entity;
@@ -39,6 +58,7 @@ public abstract class RenderProxy : MeshRenderBase
     public virtual void RecalculateBoundingBox()
     {
         // do nothing
+        boundingSphereDirty = true;
     }
 
     public virtual bool HitTest(Ray hitTestRay, out Vector3 hitLocation)
